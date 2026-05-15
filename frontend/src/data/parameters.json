@@ -1,0 +1,29 @@
+{
+  "EEPROM": [
+    { "name": "size", "label": "Memory Size", "unit": "KB" },
+    { "name": "footprint", "label": "Footprint", "unit": "" },
+    { "name": "interface", "label": "Interface", "unit": "" },
+    { "name": "voltage", "label": "Supply Voltage", "unit": "V" },
+    { "name": "write_endurance", "label": "Write Endurance", "unit": "cycles" }
+  ],
+  "Capacitor": [
+    { "name": "capacitance", "label": "Capacitance", "unit": "uF" },
+    { "name": "voltage_rating", "label": "Voltage Rating", "unit": "V" },
+    { "name": "tolerance", "label": "Tolerance", "unit": "%" },
+    { "name": "esr", "label": "ESR", "unit": "mOhm" },
+    { "name": "package", "label": "Package", "unit": "" }
+  ],
+  "Resistor": [
+    { "name": "resistance", "label": "Resistance", "unit": "Ohm" },
+    { "name": "power_rating", "label": "Power Rating", "unit": "W" },
+    { "name": "tolerance", "label": "Tolerance", "unit": "%" },
+    { "name": "package", "label": "Package", "unit": "" }
+  ],
+  "MOSFET": [
+    { "name": "vds", "label": "VDS", "unit": "V" },
+    { "name": "vgs", "label": "VGS", "unit": "V" },
+    { "name": "rds_on", "label": "RDS(on)", "unit": "mOhm" },
+    { "name": "id", "label": "Drain Current", "unit": "A" },
+    { "name": "package", "label": "Package", "unit": "" }
+  ]
+}
