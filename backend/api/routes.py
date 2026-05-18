@@ -95,14 +95,26 @@ async def extract_ai(
     try:
         params_list = json.loads(parameters)
         
+        ai_provider = os.getenv("AI_PROVIDER", "openrouter").lower()
+        
         if datasheet_file:
             pdf_bytes = await datasheet_file.read()
-            result = await extract_with_anthropic(
-                params_list,
-                pdf_bytes,
-                part_number,
-                manufacturer
-            )
+            
+            if ai_provider == "anthropic":
+                result = await extract_with_anthropic(
+                    params_list,
+                    pdf_bytes,
+                    part_number,
+                    manufacturer
+                )
+            else:
+                result = await extract_with_openrouter(
+                    params_list,
+                    datasheet_url or "",
+                    part_number,
+                    manufacturer,
+                    pdf_bytes=pdf_bytes
+                )
         elif datasheet_url:
             result = await extract_with_openrouter(
                 params_list,

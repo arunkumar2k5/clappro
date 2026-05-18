@@ -7,12 +7,13 @@ async def search_datasheet(part_number: str, manufacturer: str) -> Optional[str]
     Search for datasheet URL using Tavily API.
     """
     api_key = os.getenv("TAVILY_API_KEY")
+    base_url = os.getenv("TAVILY_BASE_URL", "https://api.tavily.com")
     
     query = f"{part_number} {manufacturer} datasheet filetype:pdf"
     
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
-            "https://api.tavily.com/search",
+            f"{base_url}/search",
             headers={
                 "Content-Type": "application/json"
             },
