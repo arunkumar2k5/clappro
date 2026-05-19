@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
 import json
+import os
 from io import BytesIO
 
 from models.component import DatasheetSearchRequest, DatasheetSearchResponse
@@ -147,6 +148,13 @@ async def extract_ai(
         )
     
     except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"ERROR in /extract/ai endpoint:")
+        print(f"{'='*60}")
+        print(error_traceback)
+        print(f"{'='*60}\n")
         raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
 
 @router.post("/extract/xtract", response_model=ExtractionResponse)

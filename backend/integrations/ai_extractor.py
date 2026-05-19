@@ -45,7 +45,7 @@ Rules:
 - If a parameter is not found, use "N/A" with confidence 0.0
 - Return ONLY valid JSON, no explanatory text"""
 
-    model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
+    model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
     max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", "4096"))
 
     message = client.messages.create(
@@ -73,6 +73,17 @@ Rules:
     )
     
     response_text = message.content[0].text
+    
+    # Strip markdown code blocks if present
+    if response_text.startswith("```"):
+        # Remove ```json or ``` at the start and ``` at the end
+        lines = response_text.split('\n')
+        if lines[0].startswith("```"):
+            lines = lines[1:]  # Remove first line with ```json
+        if lines[-1].strip() == "```":
+            lines = lines[:-1]  # Remove last line with ```
+        response_text = '\n'.join(lines).strip()
+    
     result = json.loads(response_text)
     
     return result
