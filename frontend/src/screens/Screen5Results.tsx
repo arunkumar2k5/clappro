@@ -55,6 +55,7 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
         parameter_names: parameters.map(p => p.name),
       });
 
+      console.log('Comparison response:', response.data);
       setComparisonData(response.data);
       setPhase('comparison');
     } catch (error) {
@@ -188,7 +189,20 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
         </button>
       </div>
 
-      {comparisonData && (
+      {!comparisonData && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800">No comparison data available. Please try again.</p>
+        </div>
+      )}
+
+      {comparisonData && !comparisonData.comparisons && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">Comparison data structure is invalid. Check console for details.</p>
+          <pre className="mt-2 text-xs">{JSON.stringify(comparisonData, null, 2)}</pre>
+        </div>
+      )}
+
+      {comparisonData && comparisonData.comparisons && (
         <>
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="w-full">

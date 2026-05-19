@@ -205,6 +205,13 @@ async def extract_xtract(
         )
     
     except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"ERROR in /extract/xtract endpoint:")
+        print(f"{'='*60}")
+        print(error_traceback)
+        print(f"{'='*60}\n")
         raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
 
 @router.post("/compare", response_model=ComparisonResponse)
@@ -237,6 +244,13 @@ async def compare(request: ComparisonRequest):
         )
     
     except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"ERROR in /compare endpoint:")
+        print(f"{'='*60}")
+        print(error_traceback)
+        print(f"{'='*60}\n")
         raise HTTPException(status_code=500, detail=f"Comparison failed: {str(e)}")
 
 @router.post("/export")

@@ -1,0 +1,38 @@
+{
+  "pdf_file": "..\\Datasheets\\AT24C_EEPROM.pdf",
+  "parameters_count": 8,
+  "results": {
+    "supply_voltage": {
+      "value": "1.8 to 5.5",
+      "confidence": 100
+    },
+    "memory_size": {
+      "value": "128K bits (16,384 x 8) or 256K bits (32,768 x 8)",
+      "confidence": 100
+    },
+    "operating_temp_min": {
+      "value": "-55 \u00b0C",
+      "confidence": 100
+    },
+    "operating_temp_max": {
+      "value": "125 \u00b0C",
+      "confidence": 100
+    },
+    "write_cycle_time": {
+      "value": "5 ms",
+      "confidence": 100
+    },
+    "data_retention": {
+      "value": "40 Years",
+      "confidence": 100
+    },
+    "endurance": {
+      "value": "1,000,000",
+      "confidence": 100
+    },
+    "access_time": {
+      "value": "NF",
+      "confidence": 0
+    }
+  }
+}

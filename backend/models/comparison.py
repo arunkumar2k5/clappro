@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Dict, List, Optional
 from enum import Enum
 
@@ -12,12 +12,15 @@ class ComparisonCell(BaseModel):
     status: MatchStatus
 
 class ComponentComparison(BaseModel):
-    part_number: str
+    part_number: str = Field(alias="partNumber", serialization_alias="partNumber")
     manufacturer: str
     parameters: Dict[str, ComparisonCell]
-    match_count: int
-    total_parameters: int
-    match_percentage: float
+    match_count: int = Field(alias="matchCount", serialization_alias="matchCount")
+    total_parameters: int = Field(alias="totalParameters", serialization_alias="totalParameters")
+    match_percentage: float = Field(alias="matchPercentage", serialization_alias="matchPercentage")
+    
+    class Config:
+        populate_by_name = True
 
 class ComparisonRequest(BaseModel):
     base_component: Dict[str, str]
