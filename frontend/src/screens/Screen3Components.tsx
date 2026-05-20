@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Upload, FileText, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { ComponentData } from '@/types';
+import '../screens/SharedScreen.css';
 
 interface Screen3ComponentsProps {
   onComponentsConfigured: (components: ComponentData[]) => void;
@@ -59,11 +60,14 @@ export const Screen3Components: React.FC<Screen3ComponentsProps> = ({ onComponen
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Component Details</h2>
-        <p className="text-gray-600">Enter component information and datasheets</p>
-      </div>
+    <div className="screen-container">
+      <div className="screen-background"></div>
+      <div className="screen-card">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Component Details</h2>
+            <p className="text-gray-300">Enter component information and datasheets</p>
+          </div>
 
       <div className="bg-white rounded-lg shadow p-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -185,6 +189,8 @@ export const Screen3Components: React.FC<Screen3ComponentsProps> = ({ onComponen
         <p className="text-sm text-blue-800">
           <strong>Note:</strong> The first component is the base component against which all others are compared.
         </p>
+      </div>
+        </div>
       </div>
     </div>
   );

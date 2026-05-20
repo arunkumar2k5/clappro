@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Brain, Server } from 'lucide-react';
 import { ExtractionMethod } from '@/types';
+import '../screens/SharedScreen.css';
 
 interface Screen4ExtractionProps {
   onMethodSelected: (method: ExtractionMethod) => void;
@@ -15,11 +16,14 @@ export const Screen4Extraction: React.FC<Screen4ExtractionProps> = ({ onMethodSe
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Extraction Method</h2>
-        <p className="text-gray-600">Choose how to extract parameters from datasheets</p>
-      </div>
+    <div className="screen-container">
+      <div className="screen-background"></div>
+      <div className="screen-card">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Extraction Method</h2>
+            <p className="text-gray-300">Choose how to extract parameters from datasheets</p>
+          </div>
 
       <div className="grid grid-cols-2 gap-6">
         <button
@@ -89,6 +93,8 @@ export const Screen4Extraction: React.FC<Screen4ExtractionProps> = ({ onMethodSe
         <p className="text-sm text-yellow-800">
           <strong>Note:</strong> Clicking "Next" will start the extraction process. This may take several seconds per component.
         </p>
+      </div>
+        </div>
       </div>
     </div>
   );

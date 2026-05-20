@@ -3,6 +3,7 @@ import { Check, X, Download } from 'lucide-react';
 import axios from 'axios';
 import { ExtractionResult, ComparisonResponse, Parameter } from '@/types';
 import { BlobLoader } from '@/components/BlobLoader';
+import '../screens/SharedScreen.css';
 
 interface Screen5ResultsProps {
   extractionResults: ExtractionResult[];
@@ -114,11 +115,14 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
 
   if (phase === 'review') {
     return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Extraction Results - Review & Edit</h2>
-          <p className="text-gray-600">Review and correct the extracted parameter values before comparison</p>
-        </div>
+      <div className="screen-container">
+        <div className="screen-background"></div>
+        <div className="screen-card">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">Extraction Results - Review & Edit</h2>
+              <p className="text-gray-300">Review and correct the extracted parameter values before comparison</p>
+            </div>
 
         <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="w-full">
@@ -169,25 +173,30 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
             Lock & Compare
           </button>
         </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Comparison Results</h2>
-          <p className="text-gray-600">Component parameter comparison and recommendation</p>
-        </div>
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
-        >
-          <Download size={20} />
-          Export to Excel
-        </button>
-      </div>
+    <div className="screen-container">
+      <div className="screen-background"></div>
+      <div className="screen-card">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">Comparison Results</h2>
+              <p className="text-gray-300">Parameter comparison across all components</p>
+            </div>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+            >
+              <Download size={20} />
+              Export to Excel
+            </button>
+          </div>
 
       {!comparisonData && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -278,6 +287,8 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
           </div>
         </>
       )}
+        </div>
+      </div>
     </div>
   );
 };

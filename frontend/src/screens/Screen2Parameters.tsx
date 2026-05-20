@@ -3,6 +3,7 @@ import { Upload, Plus, X } from 'lucide-react';
 import componentTypes from '@/data/component_types.json';
 import parametersData from '@/data/parameters.json';
 import { Parameter } from '@/types';
+import '../screens/SharedScreen.css';
 
 interface Screen2ParametersProps {
   onParametersSelected: (params: Parameter[]) => void;
@@ -66,11 +67,14 @@ export const Screen2Parameters: React.FC<Screen2ParametersProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Component Type & Parameters</h2>
-        <p className="text-gray-600">Select the component type and configure parameters for extraction</p>
-      </div>
+    <div className="screen-container">
+      <div className="screen-background"></div>
+      <div className="screen-card">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Component Type & Parameters</h2>
+            <p className="text-gray-300">Select the component type and configure parameters for extraction</p>
+          </div>
 
       <div className="bg-white rounded-lg shadow p-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -180,6 +184,8 @@ export const Screen2Parameters: React.FC<Screen2ParametersProps> = ({
           )}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };
