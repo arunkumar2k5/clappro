@@ -1,55 +1,46 @@
-/* Blob Loader Styles - Claude-inspired morphing animation */
+/* Starburst Loader Styles - Claude Desktop inspired animation */
 
 /* CSS Variables for easy color customization */
 :root {
-  --blob-color-start: #3b82f6; /* Blue-500 */
-  --blob-color-end: #60a5fa;   /* Blue-400 */
-  --blob-size: 200px;
+  --starburst-color: #3b82f6; /* Blue-500 */
+  --starburst-size: 200px;
+  --ray-width: 40px;
+  --ray-height: 80px;
 }
 
-.blob-container {
-  width: var(--blob-size);
-  height: var(--blob-size);
+.starburst-container {
+  width: var(--starburst-size);
+  height: var(--starburst-size);
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.blob-svg {
+.starburst {
   width: 100%;
   height: 100%;
-  transform-origin: center;
-  animation: blobRotate 20s linear infinite;
+  position: relative;
+  animation: starburstRotate 2s linear infinite;
 }
 
-.blob-path {
-  transform-origin: center;
+.ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--ray-width);
+  height: var(--ray-height);
+  background: var(--starburst-color);
+  border-radius: 50px;
+  transform-origin: center center;
+  margin-left: calc(var(--ray-width) / -2);
+  margin-top: calc(var(--ray-height) / -2);
+  animation: rayPulse 1.2s ease-in-out infinite;
+  opacity: 0.8;
 }
 
-.blob-path-1 {
-  animation: blobPulse 3s ease-in-out infinite;
-}
-
-.blob-path-2 {
-  animation: blobPulse 3s ease-in-out infinite 0.5s;
-}
-
-.blob-path-3 {
-  animation: blobPulse 3s ease-in-out infinite 1s;
-}
-
-/* Gradient colors - editable via CSS variables */
-.blob-gradient-start {
-  stop-color: var(--blob-color-start);
-}
-
-.blob-gradient-end {
-  stop-color: var(--blob-color-end);
-}
-
-/* Rotation animation for the entire blob */
-@keyframes blobRotate {
+/* Rotation animation for the entire starburst */
+@keyframes starburstRotate {
   0% {
     transform: rotate(0deg);
   }
@@ -58,29 +49,30 @@
   }
 }
 
-/* Pulsing animation for individual paths */
-@keyframes blobPulse {
+/* Pulsing/scaling animation for individual rays */
+@keyframes rayPulse {
   0%, 100% {
-    transform: scale(1);
-    opacity: 1;
+    transform: scaleY(0.6);
+    opacity: 0.3;
   }
   50% {
-    transform: scale(1.05);
-    opacity: 0.8;
+    transform: scaleY(1);
+    opacity: 0.9;
   }
 }
 
 /* Responsive sizing */
 @media (max-width: 640px) {
   :root {
-    --blob-size: 150px;
+    --starburst-size: 150px;
+    --ray-width: 30px;
+    --ray-height: 60px;
   }
 }
 
 /* Dark mode support (optional) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --blob-color-start: #60a5fa;
-    --blob-color-end: #93c5fd;
+    --starburst-color: #60a5fa;
   }
 }
