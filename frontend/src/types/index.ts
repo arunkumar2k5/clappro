@@ -16,6 +16,8 @@ export interface ExtractionResult {
   manufacturer: string;
   parameters: Record<string, ParameterValue>;
   overallConfidence: number;
+  datasheetUrl?: string;
+  datasheetFile?: File;
 }
 
 export interface ParameterValue {

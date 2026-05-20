@@ -7,7 +7,7 @@ from io import BytesIO
 
 from models.component import DatasheetSearchRequest, DatasheetSearchResponse
 from models.extraction import ExtractionRequest, ExtractionResponse, ParameterValue
-from models.comparison import ComparisonRequest, ComparisonResponse
+from models.comparison import ComparisonRequest, ComparisonResponse, ExportRequest
 
 from integrations.ai_extractor import extract_with_anthropic, extract_with_openrouter
 from integrations.xtract_ai import extract_with_xtract_ai
@@ -172,15 +172,18 @@ async def extract_xtract(
         params_list = json.loads(parameters)
         
         pdf_bytes = None
+        pdf_filename = ""
         if datasheet_file:
             pdf_bytes = await datasheet_file.read()
+            pdf_filename = datasheet_file.filename
         
         result = await extract_with_xtract_ai(
             params_list,
             datasheet_url,
             pdf_bytes,
             part_number,
-            manufacturer
+            manufacturer,
+            pdf_filename
         )
         
         parameters_dict = {}
@@ -254,19 +257,20 @@ async def compare(request: ComparisonRequest):
         raise HTTPException(status_code=500, detail=f"Comparison failed: {str(e)}")
 
 @router.post("/export")
-async def export_excel(
-    parameter_names: List[str],
-    base_component: dict,
-    comparisons: List[dict],
-    justifications: dict,
-    recommendation: str,
-    confidence_scores: dict
-):
+async def export_excel(request: ExportRequest):
     """
     Generate and download Excel file with comparison results.
     """
     try:
         from models.comparison import ComponentComparison, ComparisonCell, MatchStatus
+        
+        # Extract data from request
+        parameter_names = request.parameter_names
+        base_component = request.base_component
+        comparisons = request.comparisons
+        justifications = request.justifications
+        recommendation = request.recommendation
+        confidence_scores = request.confidence_scores
         
         comp_objects = []
         for comp_data in comparisons:
@@ -277,13 +281,14 @@ async def export_excel(
                     status=MatchStatus(cell_data.get("status", "not_available"))
                 )
             
+            # Handle both camelCase (from frontend) and snake_case (from backend)
             comp_objects.append(ComponentComparison(
-                part_number=comp_data.get("part_number", "Unknown"),
+                part_number=comp_data.get("partNumber") or comp_data.get("part_number", "Unknown"),
                 manufacturer=comp_data.get("manufacturer", "Unknown"),
                 parameters=params,
-                match_count=comp_data.get("match_count", 0),
-                total_parameters=comp_data.get("total_parameters", 0),
-                match_percentage=comp_data.get("match_percentage", 0.0)
+                match_count=comp_data.get("matchCount") or comp_data.get("match_count", 0),
+                total_parameters=comp_data.get("totalParameters") or comp_data.get("total_parameters", 0),
+                match_percentage=comp_data.get("matchPercentage") or comp_data.get("match_percentage", 0.0)
             ))
         
         excel_bytes = generate_excel_export(
@@ -302,4 +307,18 @@ async def export_excel(
         )
     
     except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"ERROR in /export endpoint:")
+        print(f"{'='*60}")
+        print(f"Request data types:")
+        print(f"  parameter_names: {type(parameter_names)}")
+        print(f"  base_component: {type(base_component)}")
+        print(f"  comparisons: {type(comparisons)}")
+        print(f"  justifications: {type(justifications)}")
+        print(f"  recommendation: {type(recommendation)}")
+        print(f"  confidence_scores: {type(confidence_scores)}")
+        print(error_traceback)
+        print(f"{'='*60}\n")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")

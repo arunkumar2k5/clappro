@@ -57,6 +57,8 @@ function App() {
           manufacturer: response.data.manufacturer,
           parameters: response.data.parameters,
           overallConfidence: response.data.overall_confidence,
+          datasheetUrl: component.datasheetUrl,
+          datasheetFile: component.datasheetFile,
         });
       }
 

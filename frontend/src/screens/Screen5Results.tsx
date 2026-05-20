@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, Download } from 'lucide-react';
+import { Check, X, Download, FileText } from 'lucide-react';
 import axios from 'axios';
 import { ExtractionResult, ComparisonResponse, Parameter } from '@/types';
 import { BlobLoader } from '@/components/BlobLoader';
@@ -23,9 +23,30 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
 
   const handleCellEdit = (componentIndex: number, paramName: string, newValue: string) => {
     const updated = [...editableResults];
-    updated[componentIndex].parameters[paramName].value = newValue;
+    
+    // Create parameter object if it doesn't exist
+    if (!updated[componentIndex].parameters[paramName]) {
+      updated[componentIndex].parameters[paramName] = {
+        value: newValue,
+        confidence: 0
+      };
+    } else {
+      updated[componentIndex].parameters[paramName].value = newValue;
+    }
+    
     setEditableResults(updated);
     onExtractionEdit(updated);
+  };
+
+  const handlePdfClick = (result: ExtractionResult) => {
+    if (result.datasheetFile) {
+      // Create blob URL for uploaded file
+      const blobUrl = URL.createObjectURL(result.datasheetFile);
+      window.open(blobUrl, '_blank');
+    } else if (result.datasheetUrl) {
+      // Open external URL
+      window.open(result.datasheetUrl, '_blank');
+    }
   };
 
   const handleCompare = async () => {
@@ -149,18 +170,43 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
                     {param.label}
                     {param.unit && <span className="text-sm text-gray-500 ml-1">({param.unit})</span>}
                   </td>
-                  {editableResults.map((result, compIdx) => (
-                    <td key={compIdx} className={compIdx === 0 ? 'bg-blue-50' : ''}>
-                      <input
-                        type="text"
-                        value={result.parameters[param.name]?.value || 'N/A'}
-                        onChange={(e) => handleCellEdit(compIdx, param.name, e.target.value)}
-                        className="w-full px-3 py-2 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </td>
-                  ))}
+                  {editableResults.map((result, compIdx) => {
+                    const currentValue = result.parameters[param.name]?.value || '';
+                    const displayValue = currentValue === 'N/A' || !currentValue ? '' : currentValue;
+                    
+                    return (
+                      <td key={compIdx} className={compIdx === 0 ? 'bg-blue-50' : ''}>
+                        <input
+                          type="text"
+                          value={displayValue}
+                          onChange={(e) => handleCellEdit(compIdx, param.name, e.target.value)}
+                          placeholder="N/A"
+                          className="w-full px-3 py-2 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+                        />
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
+              
+              {/* Datasheet Row */}
+              <tr className="bg-gradient-to-r from-green-50 to-emerald-50 border-t-2 border-green-200">
+                <td className="px-4 py-3 font-bold text-gray-900">
+                  Datasheet
+                </td>
+                {editableResults.map((result, compIdx) => (
+                  <td key={compIdx} className={`text-center ${compIdx === 0 ? 'bg-blue-50/50' : ''}`}>
+                    <button
+                      onClick={() => handlePdfClick(result)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                      title={`View ${result.partNumber} datasheet`}
+                    >
+                      <FileText size={18} />
+                      View PDF
+                    </button>
+                  </td>
+                ))}
+              </tr>
             </tbody>
           </table>
         </div>

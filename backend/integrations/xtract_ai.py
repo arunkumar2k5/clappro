@@ -32,7 +32,8 @@ async def extract_with_xtract_ai(
     datasheet_url: Optional[str] = None,
     datasheet_file: Optional[bytes] = None,
     part_number: str = "",
-    manufacturer: str = ""
+    manufacturer: str = "",
+    pdf_filename: str = ""
 ) -> Dict[str, Dict[str, any]]:
     """
     Extract parameters using Xtract AI Docker service.
@@ -41,7 +42,8 @@ async def extract_with_xtract_ai(
     1. Upload parameters JSON file
     2. Upload PDF file
     3. Trigger extraction with mode
-    4. Parse and return results
+    4. Retrieve and save markdown file
+    5. Parse and return results
     """
     base_url = os.getenv("XTRACT_AI_BASE_URL", "http://localhost:8000")
     
@@ -99,7 +101,30 @@ async def extract_with_xtract_ai(
         response.raise_for_status()
         extraction_result = response.json()
         
-        # Step 4: Parse results
+        # Step 4: Retrieve and save markdown file
+        try:
+            markdown_response = await client.get(f"{base_url}/api/markdown")
+            markdown_response.raise_for_status()
+            markdown_data = markdown_response.json()
+            markdown_content = markdown_data.get("markdown", "")
+            
+            if markdown_content and pdf_filename:
+                # Save markdown to Datasheets folder
+                datasheets_dir = Path(__file__).parent.parent.parent / "Datasheets"
+                datasheets_dir.mkdir(exist_ok=True)
+                
+                # Create .md filename from PDF filename
+                md_filename = Path(pdf_filename).stem + ".md"
+                md_filepath = datasheets_dir / md_filename
+                
+                with open(md_filepath, 'w', encoding='utf-8') as f:
+                    f.write(markdown_content)
+                
+                print(f"📝 Markdown saved: {md_filepath}")
+        except Exception as e:
+            print(f"⚠️  Failed to retrieve/save markdown: {str(e)}")
+        
+        # Step 5: Parse results
         results = extraction_result.get("results", [])
         print(f"✅ Extraction complete: {len(results)} parameters processed")
         

@@ -34,3 +34,11 @@ class ComparisonResponse(BaseModel):
     recommendation: Optional[str] = None
     no_exact_match: bool = False
     best_partial_match: Optional[str] = None
+
+class ExportRequest(BaseModel):
+    parameter_names: List[str]
+    base_component: Dict[str, str]
+    comparisons: List[dict]
+    justifications: Dict[str, str]
+    recommendation: str
+    confidence_scores: Dict[str, float]
