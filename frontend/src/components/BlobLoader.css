@@ -3,71 +3,22 @@
 /* CSS Variables for easy color customization */
 :root {
   --starburst-color: #3b82f6; /* Blue-500 */
-  --starburst-size: 200px;
-  --ray-width: 40px;
-  --ray-height: 80px;
 }
 
-.starburst-container {
-  width: var(--starburst-size);
-  height: var(--starburst-size);
+.burst {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 90px;
+  height: 90px;
 }
 
-.starburst {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  animation: starburstRotate 2s linear infinite;
-}
-
-.ray {
+.petal {
   position: absolute;
+  width: 7px;
   top: 50%;
   left: 50%;
-  width: var(--ray-width);
-  height: var(--ray-height);
+  margin-left: -3.5px;
+  border-radius: 4px;
   background: var(--starburst-color);
-  border-radius: 50px;
-  transform-origin: center center;
-  margin-left: calc(var(--ray-width) / -2);
-  margin-top: calc(var(--ray-height) / -2);
-  animation: rayPulse 1.2s ease-in-out infinite;
-  opacity: 0.8;
-}
-
-/* Rotation animation for the entire starburst */
-@keyframes starburstRotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Pulsing/scaling animation for individual rays */
-@keyframes rayPulse {
-  0%, 100% {
-    transform: scaleY(0.6);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 0.9;
-  }
-}
-
-/* Responsive sizing */
-@media (max-width: 640px) {
-  :root {
-    --starburst-size: 150px;
-    --ray-width: 30px;
-    --ray-height: 60px;
-  }
 }
 
 /* Dark mode support (optional) */

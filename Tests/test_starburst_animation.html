@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Thinking Starburst - Test</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .container {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #1f2937;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+
+    .burst {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      margin: 2rem auto;
+    }
+
+    .petal {
+      position: absolute;
+      width: 7px;
+      top: 50%;
+      left: 50%;
+      margin-left: -3.5px;
+      border-radius: 4px;
+      background: #3b82f6;
+    }
+
+    .message {
+      margin-top: 1rem;
+      color: #4b5563;
+      font-size: 1.125rem;
+      font-weight: 500;
+    }
+
+    .controls {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .color-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem;
+    }
+
+    .color-control label {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .color-control input[type="color"] {
+      width: 50px;
+      height: 30px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f3f4f6;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      color: #4b5563;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🎨 Claude Thinking Starburst</h1>
+    
+    <div class="burst" id="burst"></div>
+    
+    <p class="message">Extracting parameters from datasheets...</p>
+
+    <div class="controls">
+      <h3 style="margin-bottom: 1rem; color: #374151;">Customize Color</h3>
+      <div class="color-control">
+        <label for="petalColor">Petal Color:</label>
+        <input type="color" id="petalColor" value="#3b82f6">
+      </div>
+    </div>
+
+    <div class="info">
+      <strong>✨ Features:</strong><br>
+      • Wave-based pulsing animation<br>
+      • Smooth rotation (150°/sec)<br>
+      • 12 petals with dynamic height changes<br>
+      • Opacity fades with wave pattern<br>
+      • Customizable color
+    </div>
+  </div>
+
+  <script>
+    const burst = document.getElementById('burst');
+    const petalColorInput = document.getElementById('petalColor');
+
+    const CFG = {
+      rotSpeed:  150,   /* degrees per second */
+      waveSpeed: 5.0,   /* wave frequency multiplier */
+      count:     12     /* number of petals */
+    };
+
+    const PETAL_W = 7;
+    const MAX_H   = 44;
+    const MIN_H   = 7;
+
+    let petals    = [];
+    let rotAngle  = 0;
+    let lastTs    = null;
+
+    function build(n) {
+      burst.innerHTML = '';
+      petals = [];
+      for (let i = 0; i < n; i++) {
+        const p = document.createElement('div');
+        p.className = 'petal';
+        burst.appendChild(p);
+        petals.push(p);
+      }
+    }
+
+    build(CFG.count);
+
+    function frame(ts) {
+      if (!lastTs) lastTs = ts;
+      const dt = Math.min((ts - lastTs) / 1000, 0.05);
+      lastTs = ts;
+
+      rotAngle += CFG.rotSpeed * dt;
+      burst.style.transform = `rotate(${rotAngle}deg)`;
+
+      const t = ts / 1000;
+      const n = petals.length;
+
+      petals.forEach((p, i) => {
+        const angle = (i / n) * Math.PI * 2;
+        const wave  = Math.sin(t * CFG.waveSpeed - angle);
+        const norm  = wave * 0.5 + 0.5;
+        const h     = Math.round(MIN_H + (MAX_H - MIN_H) * norm);
+
+        p.style.height         = h + 'px';
+        p.style.marginTop      = (-h) + 'px';
+        p.style.transformOrigin = `center ${h}px`;
+        p.style.transform      = `rotate(${i * (360 / n)}deg)`;
+        p.style.opacity        = (0.3 + 0.7 * norm).toFixed(2);
+      });
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+
+    // Color customization
+    petalColorInput.addEventListener('input', (e) => {
+      petals.forEach(p => {
+        p.style.background = e.target.value;
+      });
+    });
+  </script>
+
+</body>
+</html>
