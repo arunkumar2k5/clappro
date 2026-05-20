@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { WizardShell } from './components/WizardShell';
-import { LoadingSpinner } from './components/LoadingSpinner';
+import { BlobLoader } from './components/BlobLoader';
 import { Screen1Intro } from './screens/Screen1Intro';
 import { Screen2Parameters } from './screens/Screen2Parameters';
 import { Screen3Components } from './screens/Screen3Components';
@@ -91,8 +91,8 @@ function App() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <LoadingSpinner message="Extracting parameters from datasheets..." />
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <BlobLoader message="Extracting parameters from datasheets..." />
       </div>
     );
   }

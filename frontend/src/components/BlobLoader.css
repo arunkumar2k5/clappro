@@ -1,0 +1,86 @@
+/* Blob Loader Styles - Claude-inspired morphing animation */
+
+/* CSS Variables for easy color customization */
+:root {
+  --blob-color-start: #3b82f6; /* Blue-500 */
+  --blob-color-end: #60a5fa;   /* Blue-400 */
+  --blob-size: 200px;
+}
+
+.blob-container {
+  width: var(--blob-size);
+  height: var(--blob-size);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blob-svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  animation: blobRotate 20s linear infinite;
+}
+
+.blob-path {
+  transform-origin: center;
+}
+
+.blob-path-1 {
+  animation: blobPulse 3s ease-in-out infinite;
+}
+
+.blob-path-2 {
+  animation: blobPulse 3s ease-in-out infinite 0.5s;
+}
+
+.blob-path-3 {
+  animation: blobPulse 3s ease-in-out infinite 1s;
+}
+
+/* Gradient colors - editable via CSS variables */
+.blob-gradient-start {
+  stop-color: var(--blob-color-start);
+}
+
+.blob-gradient-end {
+  stop-color: var(--blob-color-end);
+}
+
+/* Rotation animation for the entire blob */
+@keyframes blobRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulsing animation for individual paths */
+@keyframes blobPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Responsive sizing */
+@media (max-width: 640px) {
+  :root {
+    --blob-size: 150px;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --blob-color-start: #60a5fa;
+    --blob-color-end: #93c5fd;
+  }
+}

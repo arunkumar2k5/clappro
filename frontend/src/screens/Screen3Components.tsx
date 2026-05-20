@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Upload, FileText } from 'lucide-react';
+import { Search, Upload, FileText, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { ComponentData } from '@/types';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 interface Screen3ComponentsProps {
   onComponentsConfigured: (components: ComponentData[]) => void;
@@ -140,7 +139,7 @@ export const Screen3Components: React.FC<Screen3ComponentsProps> = ({ onComponen
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300"
                 >
                   {searchingIndex === index ? (
-                    <LoadingSpinner message="" />
+                    <Loader2 size={20} className="animate-spin" />
                   ) : (
                     <>
                       <Search size={20} />

@@ -239,3 +239,12 @@ Proprietary - All rights reserved
 
 0.1.0
 This is a clappro a calp project for the active Electronics component
+
+
+## command to run Backend and front end. 
+
+## backend
+uvicorn main:app --reload --port 8001
+
+## frontend
+npm run dev

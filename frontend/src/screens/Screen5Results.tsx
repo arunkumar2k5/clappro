@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Check, X, Download } from 'lucide-react';
 import axios from 'axios';
 import { ExtractionResult, ComparisonResponse, Parameter } from '@/types';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { BlobLoader } from '@/components/BlobLoader';
 
 interface Screen5ResultsProps {
   extractionResults: ExtractionResult[];
@@ -109,7 +109,7 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
   };
 
   if (loading) {
-    return <LoadingSpinner message={phase === 'review' ? 'Running comparison...' : 'Generating Excel file...'} />;
+    return <BlobLoader message={phase === 'review' ? 'Running comparison...' : 'Generating Excel file...'} />;
   }
 
   if (phase === 'review') {
