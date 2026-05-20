@@ -1,0 +1,101 @@
+/* Screen1 Intro - Futuristic UI with blurred background and glowing border */
+
+.screen1-container {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+/* Blurred background image */
+.screen1-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px);
+  opacity: 0.3;
+  z-index: 0;
+}
+
+/* Add a dark overlay for better contrast */
+.screen1-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.85) 100%);
+  z-index: 1;
+}
+
+/* Main content card with glowing blue border */
+.screen1-card {
+  position: relative;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  border-radius: 24px;
+  padding: 4rem 3rem;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 
+    0 0 40px rgba(59, 130, 246, 0.3),
+    0 0 80px rgba(59, 130, 246, 0.2),
+    0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* Glowing border animation */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 40px rgba(59, 130, 246, 0.3),
+      0 0 80px rgba(59, 130, 246, 0.2),
+      0 20px 60px rgba(0, 0, 0, 0.5);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 
+      0 0 60px rgba(59, 130, 246, 0.5),
+      0 0 120px rgba(59, 130, 246, 0.3),
+      0 20px 60px rgba(0, 0, 0, 0.5);
+    border-color: rgba(59, 130, 246, 0.8);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .screen1-card {
+    padding: 3rem 2rem;
+    max-width: 95%;
+  }
+  
+  .screen1-container {
+    min-height: 50vh;
+  }
+}
+
+/* Optional: Add subtle grid pattern overlay */
+.screen1-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: 2;
+}
