@@ -3,6 +3,7 @@ import { Upload, Plus, X } from 'lucide-react';
 import componentTypes from '@/data/component_types.json';
 import parametersData from '@/data/parameters.json';
 import { Parameter } from '@/types';
+import { parseParameterJSON } from '@/utils/parameterParser';
 import '../screens/SharedScreen.css';
 
 interface Screen2ParametersProps {
@@ -39,12 +40,15 @@ export const Screen2Parameters: React.FC<Screen2ParametersProps> = ({
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        try {
-          const uploadedParams = JSON.parse(event.target?.result as string);
-          setParameters(uploadedParams);
-          onParametersSelected(uploadedParams);
-        } catch (error) {
-          alert('Invalid JSON file');
+        const jsonContent = event.target?.result as string;
+        const result = parseParameterJSON(jsonContent);
+        
+        if (result.success && result.parameters) {
+          setParameters(result.parameters);
+          onParametersSelected(result.parameters);
+        } else {
+          alert(`Failed to parse JSON file:\n\n${result.error}\n\nPlease ensure your JSON follows the format specified in PARAMETER_JSON_FORMAT.md`);
+          e.target.value = '';
         }
       };
       reader.readAsText(file);
@@ -129,11 +133,33 @@ export const Screen2Parameters: React.FC<Screen2ParametersProps> = ({
           <div className="max-h-96 overflow-y-auto space-y-2">
             {parameters.map((param, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <span className="font-medium">{param.label}</span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    ({param.name}){param.unit && ` - ${param.unit}`}
-                  </span>
+                <div className="flex-1">
+                  <div>
+                    <span className="font-medium">{param.label || param.name}</span>
+                    <span className="text-sm text-gray-500 ml-2">
+                      ({param.name}){param.unit && ` - ${param.unit}`}
+                    </span>
+                  </div>
+                  {param.Symbol && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      Symbol: {param.Symbol}
+                    </div>
+                  )}
+                  {param.symbols && param.symbols.length > 1 && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      Symbols: {param.symbols.join(', ')}
+                    </div>
+                  )}
+                  {param.aliases && param.aliases.length > 0 && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      Aliases: {param.aliases.join(', ')}
+                    </div>
+                  )}
+                  {param.description && (
+                    <div className="text-xs text-gray-500 mt-1 italic">
+                      {param.description}
+                    </div>
+                  )}
                 </div>
                 {parameterMode === 'builtin' && (
                   <button

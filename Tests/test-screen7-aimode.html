@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Screen 7 - AI Mode (Single Screen)</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Mock extraction results data
+        const mockBaseResult = {
+            partNumber: "M48Z58Y",
+            manufacturer: "STMicroelectronics",
+            datasheetUrl: "https://www.st.com/resource/en/datasheet/m48z58.pdf",
+            parameters: {
+                "supply_voltage": { value: "4.75 to 5.5", confidence: 1.0 },
+                "read_cycle_time": { value: "70 ns", confidence: 1.0 },
+                "address_access_time": { value: "70 ns", confidence: 1.0 },
+                "chip_enable_access_time": { value: "70 ns", confidence: 1.0 },
+                "output_enable_access_time": { value: "35 ns", confidence: 1.0 },
+                "write_cycle_time": { value: "70 ns", confidence: 1.0 },
+                "write_enable_pulse_width": { value: "50 ns", confidence: 1.0 },
+                "data_setup_to_write_enable_high": { value: "30 ns", confidence: 1.0 }
+            }
+        };
+
+        const mockCandidateResult = {
+            partNumber: "DS1225Y",
+            manufacturer: "Maxim Integrated",
+            datasheetUrl: "https://datasheets.maximintegrated.com/en/ds/DS1225Y.pdf",
+            parameters: {
+                "supply_voltage": { value: "4.5 to 5.5", confidence: 1.0 },
+                "read_cycle_time": { value: "85 ns", confidence: 1.0 },
+                "address_access_time": { value: "85 ns", confidence: 1.0 },
+                "chip_enable_access_time": { value: "85 ns", confidence: 1.0 },
+                "output_enable_access_time": { value: "40 ns", confidence: 1.0 },
+                "write_cycle_time": { value: "85 ns", confidence: 1.0 },
+                "write_enable_pulse_width": { value: "55 ns", confidence: 1.0 },
+                "data_setup_to_write_enable_high": { value: "35 ns", confidence: 1.0 }
+            }
+        };
+
+        const Screen7AIMode = () => {
+            const [aiAnalysisResult, setAiAnalysisResult] = useState('');
+            const [loadingAnalysis, setLoadingAnalysis] = useState(true);
+            const [chatMessages, setChatMessages] = useState([]);
+            const [chatInput, setChatInput] = useState('');
+            const [sendingMessage, setSendingMessage] = useState(false);
+            const [showPromptEditor, setShowPromptEditor] = useState(false);
+            const [showSummary, setShowSummary] = useState(true);
+            const [systemPrompt, setSystemPrompt] = useState(
+                `You are an expert Electronics Digital Engineer specializing in SRAM memory components. 
+You have deep knowledge of timing parameters, AC/DC characteristics, and compatibility analysis for memory ICs.
+Help the user understand timing diagrams, parameter specifications, and compatibility issues between components.`
+            );
+            const [editablePrompt, setEditablePrompt] = useState(systemPrompt);
+            const chatEndRef = useRef(null);
+            const fileInputRef = useRef(null);
+
+            useEffect(() => {
+                performAIAnalysis();
+            }, []);
+
+            useEffect(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [chatMessages]);
+
+            const performAIAnalysis = async () => {
+                setLoadingAnalysis(true);
+                try {
+                    const analysisPrompt = `Analyze the timing compatibility between these two SRAM components:
+
+BASE COMPONENT: ${mockBaseResult.partNumber} (${mockBaseResult.manufacturer})
+CANDIDATE COMPONENT: ${mockCandidateResult.partNumber} (${mockCandidateResult.manufacturer})
+
+Please analyze the READ and WRITE cycle timing parameters and provide:
+1. Overall compatibility verdict (COMPATIBLE / NOT COMPATIBLE / NEEDS REVIEW)
+2. Detailed analysis of READ cycle parameters
+3. Detailed analysis of WRITE cycle parameters
+4. Any critical timing violations or concerns
+5. Recommendations for the replacement
+
+Base Component Parameters:
+${JSON.stringify(mockBaseResult.parameters, null, 2)}
+
+Candidate Component Parameters:
+${JSON.stringify(mockCandidateResult.parameters, null, 2)}`;
+
+                    const response = await fetch('http://localhost:8001/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            messages: [
+                                { role: 'system', content: systemPrompt },
+                                { role: 'user', content: analysisPrompt }
+                            ]
+                        })
+                    });
+
+                    const data = await response.json();
+                    setAiAnalysisResult(data.response || 'Analysis completed. Please review the results.');
+                } catch (error) {
+                    console.error('AI Analysis failed:', error);
+                    setAiAnalysisResult('Failed to perform AI analysis. Please check your API configuration and try again.');
+                } finally {
+                    setLoadingAnalysis(false);
+                }
+            };
+
+            const handleExportToWord = () => {
+                alert('Word export will be implemented in the React app. For now, you can copy the summary text.');
+                // In the actual React app, this will use the docx library
+            };
+
+            const handlePdfClick = (result) => {
+                if (result.datasheetUrl) {
+                    window.open(result.datasheetUrl, '_blank');
+                }
+            };
+
+            const handleImageUpload = (event) => {
+                const file = event.target.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const imageData = e.target?.result;
+                        setChatInput(prev => prev + '\n[Image attached]');
+                        if (fileInputRef.current) {
+                            fileInputRef.current.dataset.imageData = imageData;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleSendMessage = async () => {
+                if (!chatInput.trim() && !fileInputRef.current?.dataset.imageData) return;
+
+                const imageData = fileInputRef.current?.dataset.imageData;
+                const newMessage = {
+                    role: 'user',
+                    content: chatInput,
+                    image: imageData
+                };
+
+                setChatMessages(prev => [...prev, newMessage]);
+                setChatInput('');
+                if (fileInputRef.current) {
+                    fileInputRef.current.dataset.imageData = '';
+                }
+
+                setSendingMessage(true);
+
+                try {
+                    const messages = [
+                        { role: 'system', content: systemPrompt },
+                        ...chatMessages.map(msg => ({
+                            role: msg.role,
+                            content: msg.content + (msg.image ? '\n[Image context provided]' : '')
+                        })),
+                        { role: 'user', content: chatInput }
+                    ];
+
+                    const response = await fetch('http://localhost:8001/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages })
+                    });
+
+                    const data = await response.json();
+
+                    const assistantMessage = {
+                        role: 'assistant',
+                        content: data.response || 'No response received.'
+                    };
+
+                    setChatMessages(prev => [...prev, assistantMessage]);
+                } catch (error) {
+                    console.error('Chat failed:', error);
+                    const errorMessage = {
+                        role: 'assistant',
+                        content: 'Failed to get response. Please check your API configuration.'
+                    };
+                    setChatMessages(prev => [...prev, errorMessage]);
+                } finally {
+                    setSendingMessage(false);
+                }
+            };
+
+            const handleSavePrompt = () => {
+                setSystemPrompt(editablePrompt);
+                setShowPromptEditor(false);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-8">
+                    <div className="max-w-7xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8">
+                        <div className="space-y-4">
+                            {/* Header */}
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-3xl font-bold text-white mb-2">AI-Powered Timing Analysis</h2>
+                                    <p className="text-gray-300">
+                                        {mockBaseResult.partNumber} vs {mockCandidateResult.partNumber}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => alert('Back to results')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                                >
+                                    ← Back
+                                </button>
+                            </div>
+
+                            {/* PDF View Buttons */}
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => handlePdfClick(mockBaseResult)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                >
+                                    📄 View Base PDF ({mockBaseResult.partNumber})
+                                </button>
+                                <button
+                                    onClick={() => handlePdfClick(mockCandidateResult)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                >
+                                    📄 View Candidate PDF ({mockCandidateResult.partNumber})
+                                </button>
+                            </div>
+
+                            {/* AI Summary Section */}
+                            {showSummary && !loadingAnalysis && aiAnalysisResult && (
+                                <div className="bg-white rounded-lg shadow overflow-hidden">
+                                    <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 flex items-center justify-between">
+                                        <h3 className="text-lg font-bold text-white">AI Analysis Summary</h3>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleExportToWord}
+                                                className="flex items-center gap-2 px-4 py-2 bg-white text-purple-600 rounded-lg hover:bg-gray-100 font-semibold text-sm"
+                                            >
+                                                📥 Export to Word
+                                            </button>
+                                            <button
+                                                onClick={() => setShowSummary(false)}
+                                                className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 text-sm"
+                                            >
+                                                Hide Summary
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="p-6 max-h-96 overflow-y-auto bg-gray-50">
+                                        <div className="prose max-w-none">
+                                            <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">
+                                                {aiAnalysisResult}
+                                            </pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {!showSummary && !loadingAnalysis && (
+                                <div>
+                                    <button
+                                        onClick={() => setShowSummary(true)}
+                                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+                                    >
+                                        Show Summary
+                                    </button>
+                                </div>
+                            )}
+
+                            {loadingAnalysis && (
+                                <div className="bg-white rounded-lg shadow p-8">
+                                    <div className="flex items-center justify-center">
+                                        <div className="text-center">
+                                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                                            <p className="text-gray-600">Analyzing timing compatibility...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Chat Interface - Full Width Below Summary */}
+                            <div className="bg-white rounded-lg shadow overflow-hidden" style={{ height: showSummary ? '500px' : '700px' }}>
+                                <div className="h-full flex flex-col">
+                                    <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-3 flex items-center justify-between">
+                                        <h3 className="text-lg font-bold text-white">Expert Chat Assistant</h3>
+                                        <button
+                                            onClick={() => setShowPromptEditor(!showPromptEditor)}
+                                            className="p-1 hover:bg-white/20 rounded"
+                                            title="View/Edit System Prompt"
+                                        >
+                                            ⚙️
+                                        </button>
+                                    </div>
+
+                                    {/* System Prompt Editor */}
+                                    {showPromptEditor && (
+                                        <div className="border-b border-gray-200 p-4 bg-gray-50">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                System Prompt:
+                                            </label>
+                                            <textarea
+                                                value={editablePrompt}
+                                                onChange={(e) => setEditablePrompt(e.target.value)}
+                                                className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                                            />
+                                            <div className="flex gap-2 mt-2">
+                                                <button
+                                                    onClick={handleSavePrompt}
+                                                    className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setEditablePrompt(systemPrompt);
+                                                        setShowPromptEditor(false);
+                                                    }}
+                                                    className="px-4 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Chat Messages */}
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                                        {chatMessages.length === 0 && (
+                                            <div className="text-center text-gray-500 mt-8">
+                                                <p className="text-sm">💬 Ask questions about timing parameters, compatibility, or upload timing diagrams for analysis.</p>
+                                            </div>
+                                        )}
+                                        {chatMessages.map((msg, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div
+                                                    className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                                                        msg.role === 'user'
+                                                            ? 'bg-blue-600 text-white'
+                                                            : 'bg-white text-gray-800 shadow'
+                                                    }`}
+                                                >
+                                                    {msg.image && (
+                                                        <img
+                                                            src={msg.image}
+                                                            alt="Uploaded"
+                                                            className="max-w-full rounded mb-2"
+                                                        />
+                                                    )}
+                                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {sendingMessage && (
+                                            <div className="flex justify-start">
+                                                <div className="bg-white rounded-lg px-4 py-2 shadow">
+                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div ref={chatEndRef} />
+                                    </div>
+
+                                    {/* Chat Input */}
+                                    <div className="border-t border-gray-200 p-4 bg-white">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="hidden"
+                                            />
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                                title="Upload timing diagram or screenshot"
+                                            >
+                                                📷
+                                            </button>
+                                            <input
+                                                type="text"
+                                                value={chatInput}
+                                                onChange={(e) => setChatInput(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                                                placeholder="Ask about timing parameters, compatibility..."
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                            <button
+                                                onClick={handleSendMessage}
+                                                disabled={sendingMessage || (!chatInput.trim() && !fileInputRef.current?.dataset.imageData)}
+                                                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                ➤
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<Screen7AIMode />, document.getElementById('root'));
+    </script>
+</body>
+</html>

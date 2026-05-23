@@ -33,6 +33,11 @@ def compare_components(
         # Use AI to intelligently compare all parameters at once
         match_results = ai_compare_parameters(comparison_pairs)
         
+        # Safety check: ensure match_results length matches parameter_names length
+        if len(match_results) != len(parameter_names):
+            print(f"⚠️  Warning: AI returned {len(match_results)} results but expected {len(parameter_names)}. Using fallback comparison.")
+            match_results = [simple_compare(pair["base_value"], pair["comp_value"]) for pair in comparison_pairs]
+        
         for i, param_name in enumerate(parameter_names):
             base_value = base_component.get(param_name, "N/A")
             comp_value = comp.get(param_name, "N/A")

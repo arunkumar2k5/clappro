@@ -1,0 +1,491 @@
+{
+  "parameters": [
+    {
+      "name": "supply_voltage",
+      "description": "Operating DC supply voltage range within which all AC and DC parameters are guaranteed by the manufacturer",
+      "symbols": ["VCC", "VDD", "VS", "VSUPPLY", "VCC(op)", "VDD(op)"],
+      "aliases": [
+        "supply voltage", "operating voltage", "power supply voltage",
+        "VCC operating range", "VDD operating range", "supply voltage range",
+        "operating supply voltage", "power supply range"
+      ],
+      "unit": "V",
+      "value_type": "range",
+      "comparison_type": "range_must_cover",
+      "notes": "Candidate VCC range must fully contain base chip VCC range. Example: base is 4.75-5.5V, candidate must support at minimum 4.75-5.5V.",
+      "confidence": 0
+    },
+    {
+      "name": "operating_temperature",
+      "description": "Ambient air temperature range over which all DC and AC specifications are guaranteed",
+      "symbols": ["TA", "TAMB", "TOP", "Ta"],
+      "aliases": [
+        "ambient operating temperature", "operating temperature range",
+        "temperature range", "ambient temperature", "operating temperature"
+      ],
+      "unit": "degC",
+      "value_type": "range",
+      "comparison_type": "range_must_cover",
+      "notes": "Candidate temperature range must be equal to or wider than base chip temperature range.",
+      "confidence": 0
+    },
+    {
+      "name": "input_high_voltage",
+      "description": "Minimum voltage that must be applied to an input pin for the chip to recognise it as a logic HIGH level. The system must drive signals at or above this threshold.",
+      "symbols": ["VIH", "VIN_H", "VINH", "VIN(HIGH)", "VH", "VIH(min)"],
+      "aliases": [
+        "input high voltage", "input high level voltage", "logic high input voltage",
+        "high level input voltage", "input voltage high", "VIH minimum",
+        "high input threshold voltage", "input HIGH level", "minimum high input voltage",
+        "input logic high", "high-level input voltage"
+      ],
+      "unit": "V",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate VIH(min) must be <= base VIH(min). A lower threshold means the chip recognises HIGH at a lower voltage and is more tolerant — compatible with a system designed for the base chip.",
+      "confidence": 0
+    },
+    {
+      "name": "input_low_voltage",
+      "description": "Maximum voltage at an input pin that is still recognised as a logic LOW. The system must drive signals at or below this threshold for a valid LOW.",
+      "symbols": ["VIL", "VIN_L", "VINL", "VIN(LOW)", "VL", "VIL(max)"],
+      "aliases": [
+        "input low voltage", "input low level voltage", "logic low input voltage",
+        "low level input voltage", "input voltage low", "VIL maximum",
+        "low input threshold voltage", "input LOW level", "maximum low input voltage",
+        "input logic low", "low-level input voltage"
+      ],
+      "unit": "V",
+      "value_type": "max",
+      "comparison_type": "chip_guarantee_max",
+      "notes": "Candidate VIL(max) must be >= base VIL(max). A higher VIL(max) means the chip tolerates a higher voltage on the low rail — more tolerant, safe in a system designed for the base chip.",
+      "confidence": 0
+    },
+    {
+      "name": "output_high_voltage",
+      "description": "Minimum output pin voltage when the output is driving a logic HIGH with the specified load current drawn from the pin.",
+      "symbols": ["VOH", "VOUT_H", "VOUTH", "VOH(min)"],
+      "aliases": [
+        "output high voltage", "output high level voltage", "logic high output voltage",
+        "high level output voltage", "output voltage high", "VOH minimum",
+        "output HIGH voltage", "output drive high voltage", "output high drive level"
+      ],
+      "unit": "V",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "Candidate VOH(min) must be >= base VOH(min). Candidate must drive HIGH at least as high as the base chip under equivalent load.",
+      "confidence": 0
+    },
+    {
+      "name": "output_low_voltage",
+      "description": "Maximum output pin voltage when the output is sinking the specified load current at logic LOW.",
+      "symbols": ["VOL", "VOUT_L", "VOUTL", "VOL(max)"],
+      "aliases": [
+        "output low voltage", "output low level voltage", "logic low output voltage",
+        "low level output voltage", "output voltage low", "VOL maximum",
+        "output LOW voltage", "output sink voltage", "output low drive level"
+      ],
+      "unit": "V",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate VOL(max) must be <= base VOL(max). Candidate must pull the bus down at least as low as the base chip under equivalent load.",
+      "confidence": 0
+    },
+    {
+      "name": "supply_current_active",
+      "description": "Maximum current drawn from the VCC supply during active read or write operation with outputs switching.",
+      "symbols": ["ICC", "IDD", "ICCOP", "ICC(op)", "IDD(op)", "IACTIVE"],
+      "aliases": [
+        "supply current", "operating supply current", "active supply current",
+        "ICC maximum", "IDD operating", "power supply current",
+        "active current", "operating current", "VCC current active",
+        "supply current (active)", "current consumption active"
+      ],
+      "unit": "mA",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate ICC(max) must be <= base ICC(max). Candidate must not exceed the power budget designed for the base chip.",
+      "confidence": 0
+    },
+    {
+      "name": "read_cycle_time",
+      "description": "Minimum elapsed time from the beginning of one read cycle (valid address asserted) to the beginning of the next consecutive read cycle. Reciprocal of maximum sustained read throughput frequency.",
+      "symbols": ["tRC", "tAVAV", "tCYC", "tRDC", "tCYCR", "tRCY", "tCR", "tCYCLE"],
+      "aliases": [
+        "read cycle time", "minimum read cycle time", "memory cycle time",
+        "address to address cycle time", "cycle time", "access cycle time",
+        "read cycle minimum", "tRC minimum", "minimum cycle time (read)"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tRC(min) must be <= base tRC(min). A smaller minimum cycle time means the chip is faster and works in a system timed for the base chip.",
+      "confidence": 0
+    },
+    {
+      "name": "address_access_time",
+      "description": "Maximum propagation delay from all address inputs becoming stable to valid and stable data appearing on the output bus. Assumes chip enable and output enable are already asserted. This is the headline read speed specification.",
+      "symbols": ["tAA", "tAVQV", "tACC", "tRA", "tA", "tCA", "tAD", "tRACC", "tAQ", "tACCSS"],
+      "aliases": [
+        "address access time", "address to output valid", "address valid to output valid",
+        "address propagation delay", "read access time", "read access time from address",
+        "address to data valid", "address access", "tAA maximum",
+        "address valid to data valid", "address to output delay",
+        "access time from address", "read access time (address)"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Primary read speed parameter. Candidate tAA(max) must be <= base tAA(max). This is the most commonly cited speed grade number in SRAM part numbers (e.g. -70 = 70 ns).",
+      "confidence": 0
+    },
+    {
+      "name": "chip_enable_access_time",
+      "description": "Maximum propagation delay from chip enable (CE / E-bar / CS) going active LOW to valid data on the output bus, with address inputs and output enable already stable and asserted.",
+      "symbols": ["tACE", "tELQV", "tCE", "tACS", "tCO", "tCEA", "tCEQ", "tEC", "tCS", "tCSAC"],
+      "aliases": [
+        "chip enable access time", "chip enable low to output valid",
+        "CE access time", "CE# to output valid", "chip select access time",
+        "chip enable to data valid", "enable access time",
+        "chip enable low to data valid", "tCE maximum", "tACE maximum",
+        "CE low to output valid", "chip select to output valid",
+        "chip enable to output", "CS to data valid"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "confidence": 0
+    },
+    {
+      "name": "output_enable_access_time",
+      "description": "Maximum propagation delay from output enable (OE / G-bar) going active LOW to valid data on the output bus, with address and chip enable already asserted. Typically shorter than tAA and tACE since internal decode is already done.",
+      "symbols": ["tOE", "tGLQV", "tAOE", "tOEA", "tGLQ", "tOEL", "tGQ", "tDOE", "tOEV", "tOEAC"],
+      "aliases": [
+        "output enable access time", "output enable low to output valid",
+        "OE access time", "OE# to output valid", "output enable to data valid",
+        "OE to output valid", "G-bar to output valid",
+        "output enable propagation delay", "tOE maximum",
+        "OE to data valid", "output enable to output", "G low to data valid"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "confidence": 0
+    },
+    {
+      "name": "chip_enable_to_output_low_z",
+      "description": "Minimum time after chip enable goes active LOW before the output pins begin to transition out of high-impedance (tri-state). Output data is not yet valid but the bus is no longer floating.",
+      "symbols": ["tELQX", "tLZCE", "tLZCS", "tCLZ", "tELZ", "tCELZ", "tLZCS"],
+      "aliases": [
+        "chip enable low to output low-Z", "chip enable to output transition",
+        "CE to output active", "chip enable low to output bus driven",
+        "CE# to output low impedance", "chip enable to bus active",
+        "chip enable low-Z time", "tLZCE minimum", "output low-Z from CE",
+        "CE to output valid start", "chip select to bus driven"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "System relies on outputs not driving the bus for at least this duration after CE assertion. Candidate must provide equal or more quiet time before driving.",
+      "confidence": 0
+    },
+    {
+      "name": "output_enable_to_output_low_z",
+      "description": "Minimum time after output enable goes active LOW before the output pins begin to transition out of high-impedance (tri-state).",
+      "symbols": ["tGLQX", "tLZOE", "tOELZ", "tGLZ", "tGLX", "tLZOE"],
+      "aliases": [
+        "output enable low to output low-Z", "OE to output transition",
+        "OE low to output active", "output enable to bus active",
+        "OE# to output low impedance", "G-bar low to output transition",
+        "output enable low-Z time", "tLZOE minimum",
+        "OE to output valid start", "output enable to bus driven"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "confidence": 0
+    },
+    {
+      "name": "chip_disable_to_output_high_z",
+      "description": "Maximum time after chip enable goes inactive HIGH before the output pins return to high-impedance (tri-state). Critical parameter for multi-device shared bus designs — the bus cannot be driven by another device until this time has elapsed.",
+      "symbols": ["tEHQZ", "tHZCE", "tHZCS", "tCHZ", "tCHZE", "tDZCE", "tCEHZ", "tHZCS"],
+      "aliases": [
+        "chip enable high to output Hi-Z", "chip disable to output Hi-Z",
+        "CE high to output high impedance", "CE# deassert to Hi-Z",
+        "chip enable high to tri-state", "output disable time (CE)",
+        "chip enable high to output float", "tHZCE maximum",
+        "chip deselect to output Hi-Z", "CE high to Hi-Z",
+        "chip enable to output high-Z", "CS high to Hi-Z",
+        "CE inactive to output float"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate must release the bus within the same or shorter time. Violation causes bus contention on shared-bus systems.",
+      "confidence": 0
+    },
+    {
+      "name": "output_disable_to_output_high_z",
+      "description": "Maximum time after output enable goes inactive HIGH before the output pins return to high-impedance (tri-state).",
+      "symbols": ["tGHQZ", "tHZOE", "tOHZ", "tGHZ", "tOEHZ", "tDZOE", "tOEZ", "tHZOE"],
+      "aliases": [
+        "output enable high to output Hi-Z", "output disable to Hi-Z",
+        "OE high to output high impedance", "OE# deassert to Hi-Z",
+        "output enable high to tri-state", "output disable time (OE)",
+        "OE high to Hi-Z", "G-bar high to output Hi-Z",
+        "output enable high to output float", "tHZOE maximum",
+        "OE inactive to output float", "output enable to high-Z"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "confidence": 0
+    },
+    {
+      "name": "output_hold_after_address_change",
+      "description": "Minimum time that the current valid output data is held stable after an address transition begins. After this window, output becomes indeterminate until the new address access completes.",
+      "symbols": ["tOH", "tAXQX", "tAXQ", "tOHA", "tAHD", "tDOH", "tOH(min)"],
+      "aliases": [
+        "output hold time", "address to output hold time",
+        "address transition to output transition", "data hold after address change",
+        "address change to output invalid", "output valid hold after address",
+        "tOH minimum", "data hold time from address", "output hold from address",
+        "address change to data invalid"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "System may pipeline address changes relying on this hold window. Candidate must guarantee at least the same hold duration.",
+      "confidence": 0
+    },
+    {
+      "name": "write_cycle_time",
+      "description": "Minimum elapsed time for a complete write operation from the start of one write cycle to the start of the next. Must be met for every write operation regardless of which control signal (WE or CE) governs the cycle.",
+      "symbols": ["tWC", "tAVAV", "tCYCW", "tWCY", "tWRC", "tWCYCLE"],
+      "aliases": [
+        "write cycle time", "minimum write cycle time", "memory write cycle time",
+        "write access cycle time", "tWC minimum", "write cycle minimum",
+        "cycle time (write)"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tWC(min) must be <= base tWC(min). System provides this timing budget for each write.",
+      "confidence": 0
+    },
+    {
+      "name": "address_setup_to_write_enable",
+      "description": "Minimum time address inputs must be stable before write enable (WE / W-bar) falls LOW at the start of a WE-controlled write cycle.",
+      "symbols": ["tAS", "tAW", "tAVWL", "tAVW", "tASW", "tSA"],
+      "aliases": [
+        "address setup to WE low", "address valid to write enable low",
+        "address setup time (WE)", "address to WE falling edge",
+        "address valid before WE", "address setup before write enable",
+        "write address setup time (WE)", "tAS minimum (WE)"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "address_setup_to_chip_enable",
+      "description": "Minimum time address inputs must be stable before chip enable (CE / E-bar) falls LOW at the start of a CE-controlled write cycle.",
+      "symbols": ["tAS", "tAVEL", "tACS", "tAVE", "tASE", "tSCE"],
+      "aliases": [
+        "address setup to CE low", "address valid to chip enable low",
+        "address setup time (CE)", "address to CE falling edge",
+        "address valid before chip enable", "address setup before chip enable",
+        "write address setup time (CE)", "tAS minimum (CE)"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "write_enable_pulse_width",
+      "description": "Minimum time write enable (WE / W-bar) must remain asserted LOW for a valid write to be guaranteed. This is the core timing budget for the internal write operation.",
+      "symbols": ["tWP", "tWE", "tWLWH", "tPWE", "tWEPW", "tWEL", "tWEW", "tWP(min)"],
+      "aliases": [
+        "write enable pulse width", "WE pulse width", "write pulse width",
+        "write enable low time", "WE low time", "write enable minimum pulse",
+        "write strobe width", "tWP minimum", "WE active time",
+        "write enable asserted time", "minimum WE pulse"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "System provides a fixed WE pulse width. Candidate must complete a valid write within that same pulse — i.e. candidate tWP(min) must be <= base tWP(min).",
+      "confidence": 0
+    },
+    {
+      "name": "chip_enable_write_pulse_width",
+      "description": "Minimum time chip enable (CE / E-bar) must remain asserted LOW in a CE-controlled write cycle to guarantee the write completes.",
+      "symbols": ["tCP", "tELEH", "tPWCE", "tCEW", "tCEL", "tCEP"],
+      "aliases": [
+        "chip enable pulse width (write)", "CE write pulse width",
+        "chip enable low time (write)", "CE low time for write",
+        "chip enable write width", "tCP minimum",
+        "CE active time (write)", "chip enable asserted time (write)"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "address_valid_to_write_enable_high",
+      "description": "Minimum time address inputs must have been stable before write enable (WE / W-bar) goes inactive HIGH at the end of a write cycle. Ensures the address is valid throughout the critical write window.",
+      "symbols": ["tAW", "tRAW", "tAVWH", "tAWH", "tAVW"],
+      "aliases": [
+        "address valid to WE high", "address to write enable high",
+        "address setup to end of write", "write address valid time",
+        "address valid before WE rising edge", "tAW minimum",
+        "address setup (end of write)", "address hold to WE high"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "address_valid_to_chip_enable_high",
+      "description": "Minimum time address inputs must have been stable before chip enable (CE / E-bar) goes inactive HIGH at the end of a CE-controlled write cycle.",
+      "symbols": ["tAE", "tAVEH", "tAEH", "tAVCE", "tACEH"],
+      "aliases": [
+        "address valid to CE high", "address to chip enable high",
+        "address setup to end of CE write", "address valid before CE rising edge",
+        "tAE minimum", "address setup (end of CE write)"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "write_enable_high_to_address_hold",
+      "description": "Minimum time address inputs must remain stable after write enable (WE / W-bar) returns HIGH at the end of a write cycle.",
+      "symbols": ["tAH", "tWHAX", "tWAH", "tAHW", "tHA"],
+      "aliases": [
+        "address hold after WE high", "WE high to address transition",
+        "address hold time (WE)", "address hold after write enable",
+        "WE deassert to address change", "write enable high to address hold",
+        "tAH minimum (WE)", "address hold from WE"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "chip_enable_high_to_address_hold",
+      "description": "Minimum time address inputs must remain stable after chip enable (CE / E-bar) returns HIGH at the end of a CE-controlled write cycle.",
+      "symbols": ["tAH", "tEHAX", "tCAH", "tAHC", "tAHCE"],
+      "aliases": [
+        "address hold after CE high", "CE high to address transition",
+        "address hold time (CE)", "address hold after chip enable",
+        "CE deassert to address change", "chip enable high to address hold",
+        "tAH minimum (CE)"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "data_setup_to_write_enable_high",
+      "description": "Minimum time data inputs (DQ pins) must be stable and valid before write enable (WE / W-bar) returns HIGH to close the write window.",
+      "symbols": ["tDS", "tDW", "tDSW", "tDVWH", "tDWH", "tDIN", "tSD"],
+      "aliases": [
+        "data setup to WE high", "data valid to write enable high",
+        "data setup time (WE)", "input data setup time",
+        "data setup before WE rising edge", "write data setup time",
+        "tDS minimum (WE)", "data valid before WE high",
+        "data input setup (WE)", "DQ setup to WE high"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "data_setup_to_chip_enable_high",
+      "description": "Minimum time data inputs (DQ pins) must be stable and valid before chip enable (CE / E-bar) returns HIGH to close a CE-controlled write cycle.",
+      "symbols": ["tDS", "tDCE", "tDVEH", "tDEH", "tDSE"],
+      "aliases": [
+        "data setup to CE high", "data valid to chip enable high",
+        "data setup time (CE)", "input data setup (CE write)",
+        "data setup before CE rising edge", "write data setup (CE)",
+        "tDS minimum (CE)", "DQ setup to CE high"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "data_hold_after_write_enable_high",
+      "description": "Minimum time data inputs (DQ pins) must remain stable after write enable (WE / W-bar) returns HIGH at the end of the write cycle.",
+      "symbols": ["tDH", "tWHDX", "tWDH", "tDHW", "tHD", "tHDW"],
+      "aliases": [
+        "data hold after WE high", "write enable high to input transition",
+        "data hold time (WE)", "input data hold time",
+        "data hold after WE rising edge", "tDH minimum (WE)",
+        "DQ hold after WE high", "data hold from WE"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "data_hold_after_chip_enable_high",
+      "description": "Minimum time data inputs (DQ pins) must remain stable after chip enable (CE / E-bar) returns HIGH at the end of a CE-controlled write cycle.",
+      "symbols": ["tDH", "tEHDX", "tCDH", "tDHE", "tDHCE"],
+      "aliases": [
+        "data hold after CE high", "chip enable high to input transition",
+        "data hold time (CE)", "input data hold (CE write)",
+        "data hold after CE rising edge", "tDH minimum (CE)",
+        "DQ hold after CE high"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "confidence": 0
+    },
+    {
+      "name": "write_enable_low_to_output_high_z",
+      "description": "Maximum time after write enable (WE / W-bar) goes active LOW before the bidirectional DQ pins transition to high-impedance. The bus must be released before the external data driver can safely drive the DQ lines with write data.",
+      "symbols": ["tWLQZ", "tHZWE", "tWLZ", "tWOZ", "tHZW", "tWZL"],
+      "aliases": [
+        "WE low to output Hi-Z", "write enable low to output high impedance",
+        "write enable to output tri-state", "WE active to output Hi-Z",
+        "write enable to output float", "tWLZ maximum",
+        "WE low to output float", "write enable asserted to Hi-Z",
+        "WE low to tri-state"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "After WE goes low, outputs must float to avoid bus contention with data being driven onto DQ. Candidate must release the bus within the same or shorter time.",
+      "confidence": 0
+    },
+    {
+      "name": "write_enable_high_to_output_active",
+      "description": "Minimum time after write enable (WE / W-bar) returns HIGH before the DQ output pins transition out of high-impedance back into the active read-driven state.",
+      "symbols": ["tOW", "tWHQX", "tWHQ", "tOAW", "tWHX"],
+      "aliases": [
+        "WE high to output transition", "write enable high to output active",
+        "write to read recovery time", "output recovery after write",
+        "WE rising to output driven", "WE deassert to output active",
+        "tOW minimum", "post-write output active time"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "System should wait at least this long after WE de-asserts before relying on output data. Candidate must guarantee equal or more recovery time.",
+      "confidence": 0
+    }
+  ]
+}

@@ -7,11 +7,13 @@ import { Screen2Parameters } from './screens/Screen2Parameters';
 import { Screen3Components } from './screens/Screen3Components';
 import { Screen4Extraction } from './screens/Screen4Extraction';
 import { Screen5Results } from './screens/Screen5Results';
+import { Screen6TimingAnalysis } from './screens/Screen6TimingAnalysis';
+import { Screen7AIMode } from './screens/Screen7AIMode';
 import { useWizard } from './hooks/useWizard';
 import { Parameter, ComponentData, ExtractionMethod, ExtractionResult } from './types';
 
 function App() {
-  const { currentStep, goNext, goBack, isFirstStep } = useWizard(5);
+  const { currentStep, goNext, goBack, isFirstStep, goToStep } = useWizard(7);
   
   const [componentType, setComponentType] = useState<string>('');
   const [parameters, setParameters] = useState<Parameter[]>([]);
@@ -19,6 +21,9 @@ function App() {
   const [extractionMethod, setExtractionMethod] = useState<ExtractionMethod>('ai');
   const [extractionResults, setExtractionResults] = useState<ExtractionResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [timingAnalysisBase, setTimingAnalysisBase] = useState<ExtractionResult | null>(null);
+  const [timingAnalysisCandidate, setTimingAnalysisCandidate] = useState<ExtractionResult | null>(null);
+  const [timingAnalysisMode, setTimingAnalysisMode] = useState<'normal' | 'condition' | 'ai'>('normal');
 
   const handleNextClick = async () => {
     if (currentStep === 4) {
@@ -86,6 +91,10 @@ function App() {
         return true;
       case 5:
         return false;
+      case 6:
+        return false;
+      case 7:
+        return false;
       default:
         return false;
     }
@@ -102,11 +111,11 @@ function App() {
   return (
     <WizardShell
       currentStep={currentStep}
-      totalSteps={5}
+      totalSteps={7}
       onNext={handleNextClick}
       onBack={goBack}
       showBack={!isFirstStep}
-      showNext={currentStep !== 5}
+      showNext={currentStep !== 5 && currentStep !== 6 && currentStep !== 7}
       nextDisabled={!canProceed()}
       nextLabel={currentStep === 4 ? 'Extract Parameters' : 'Next'}
     >
@@ -132,6 +141,35 @@ function App() {
           extractionResults={extractionResults}
           parameters={parameters}
           onExtractionEdit={setExtractionResults}
+          onTimingAnalysis={(base, candidate, mode) => {
+            setTimingAnalysisBase(base);
+            setTimingAnalysisCandidate(candidate);
+            setTimingAnalysisMode(mode);
+            
+            // Route based on mode
+            if (mode === 'normal') {
+              goToStep(6); // Go to Screen6 (Normal timing analysis)
+            } else if (mode === 'ai') {
+              goToStep(7); // Go to Screen7 (AI mode)
+            }
+          }}
+        />
+      )}
+      
+      {currentStep === 6 && timingAnalysisBase && timingAnalysisCandidate && timingAnalysisMode === 'normal' && (
+        <Screen6TimingAnalysis
+          baseResult={timingAnalysisBase}
+          candidateResult={timingAnalysisCandidate}
+          onBack={() => goToStep(5)}
+        />
+      )}
+      
+      {currentStep === 7 && timingAnalysisBase && timingAnalysisCandidate && timingAnalysisMode === 'ai' && (
+        <Screen7AIMode
+          baseResult={timingAnalysisBase}
+          candidateResult={timingAnalysisCandidate}
+          componentType={componentType}
+          onBack={() => goToStep(5)}
         />
       )}
     </WizardShell>

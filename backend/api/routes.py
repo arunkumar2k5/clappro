@@ -8,6 +8,7 @@ from io import BytesIO
 from models.component import DatasheetSearchRequest, DatasheetSearchResponse
 from models.extraction import ExtractionRequest, ExtractionResponse, ParameterValue
 from models.comparison import ComparisonRequest, ComparisonResponse, ExportRequest
+from models.chat import ChatRequest, ChatResponse
 
 from integrations.ai_extractor import extract_with_anthropic, extract_with_openrouter
 from integrations.xtract_ai import extract_with_xtract_ai
@@ -322,3 +323,91 @@ async def export_excel(request: ExportRequest):
         print(error_traceback)
         print(f"{'='*60}\n")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """
+    Chat endpoint for AI-powered timing analysis assistance.
+    Uses AI_PROVIDER from .env (anthropic or openrouter).
+    """
+    try:
+        ai_provider = os.getenv("AI_PROVIDER", "anthropic").lower()
+        
+        # Convert messages to appropriate format
+        messages = []
+        system_message = None
+        
+        for msg in request.messages:
+            if msg.role == 'system':
+                system_message = msg.content
+            else:
+                messages.append({
+                    "role": msg.role,
+                    "content": msg.content
+                })
+        
+        if ai_provider == "anthropic":
+            from anthropic import Anthropic
+            
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            if not api_key:
+                raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
+            
+            client = Anthropic(api_key=api_key)
+            model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+            max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", "4096"))
+            
+            response = client.messages.create(
+                model=model,
+                max_tokens=max_tokens,
+                system=system_message if system_message else "You are a helpful assistant.",
+                messages=messages
+            )
+            
+            response_text = response.content[0].text
+            
+        elif ai_provider == "openrouter":
+            from openai import OpenAI
+            
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            if not api_key:
+                raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY not configured")
+            
+            base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+            model = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4")
+            
+            client = OpenAI(
+                base_url=base_url,
+                api_key=api_key,
+            )
+            
+            # Add system message as first user message for OpenRouter
+            chat_messages = []
+            if system_message:
+                chat_messages.append({
+                    "role": "system",
+                    "content": system_message
+                })
+            chat_messages.extend(messages)
+            
+            completion = client.chat.completions.create(
+                model=model,
+                messages=chat_messages
+            )
+            
+            response_text = completion.choices[0].message.content
+            
+        else:
+            raise HTTPException(status_code=500, detail=f"Unsupported AI_PROVIDER: {ai_provider}")
+        
+        return ChatResponse(response=response_text)
+        
+    except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"ERROR in /chat endpoint:")
+        print(f"{'='*60}")
+        print(error_traceback)
+        print(f"{'='*60}\n")
+        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")

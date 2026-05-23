@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen5 Results Test - SRAM Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f3f4f6;
+            padding: 20px;
+        }
+        .screen-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            ring: 2px;
+            ring-color: #3b82f6;
+        }
+        .bg-blue-100 { background-color: #dbeafe; }
+        .bg-red-100 { background-color: #fee2e2; }
+        .bg-white { background-color: #ffffff; }
+        .bg-blue-50 { background-color: #eff6ff; }
+    </style>
+</head>
+<body>
+    <div class="screen-container">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Extraction Results - Review & Edit</h2>
+            <p class="text-gray-600">Review the extracted parameter values (Test Data from sramresult.json)</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow overflow-x-auto mb-6">
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th class="text-left">Parameter</th>
+                        <th class="text-center bg-blue-100">
+                            M48Z58Y
+                            <div class="text-xs font-normal mt-1">Confidence: 95.0%</div>
+                            <div class="text-xs font-normal text-blue-600 mt-1">BASE</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <h3 class="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
+            <div class="flex gap-6 text-sm">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-6 bg-white border border-gray-300 rounded"></div>
+                    <span class="text-gray-700">DC Parameters</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-6 bg-blue-100 border border-gray-300 rounded"></div>
+                    <span class="text-gray-700">AC Parameters (time-based)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-6 bg-red-100 border border-gray-300 rounded"></div>
+                    <span class="text-gray-700">Low Confidence (&lt;80%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load and display the data
+        async function loadData() {
+            try {
+                const sramResult = await fetch('./sramresult.json').then(r => r.json());
+                
+                const tableBody = document.getElementById('tableBody');
+                
+                // Render each parameter from sramresult.json
+                sramResult.parameters.forEach(param => {
+                    const row = document.createElement('tr');
+                    
+                    // Check if AC characteristic
+                    const isAC = isACCharacteristic(param.unit);
+                    const rowClass = isAC ? 'bg-blue-100' : 'bg-white';
+                    row.className = rowClass;
+                    
+                    // Parameter name cell
+                    const nameCell = document.createElement('td');
+                    nameCell.className = 'px-4 py-3 font-medium text-gray-900';
+                    const label = formatLabel(param.name);
+                    nameCell.innerHTML = `${label} <span class="text-sm text-gray-500">(${param.unit || ''})</span>`;
+                    row.appendChild(nameCell);
+                    
+                    // Value cell
+                    const valueCell = document.createElement('td');
+                    const confidence = param.confidence;
+                    let cellClass = '';
+                    
+                    if (confidence < 80) {
+                        cellClass = 'bg-red-100';
+                    } else if (isAC) {
+                        cellClass = 'bg-blue-100';
+                    } else {
+                        cellClass = 'bg-blue-50';
+                    }
+                    
+                    valueCell.className = cellClass;
+                    valueCell.innerHTML = `<input type="text" value="${param.value}" class="bg-transparent" />`;
+                    row.appendChild(valueCell);
+                    
+                    tableBody.appendChild(row);
+                });
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('tableBody').innerHTML = 
+                    '<tr><td colspan="2" class="text-center text-red-600 p-4">Error loading data: ' + error.message + '<br>Make sure sramresult.json is in the same folder as this HTML file.</td></tr>';
+            }
+        }
+        
+        function isACCharacteristic(unit) {
+            if (!unit) return false;
+            const timeBased = ['s', 'ms', 'us', 'ns', 'ps', 'μs'];
+            return timeBased.some(timeUnit => unit.toLowerCase().includes(timeUnit));
+        }
+        
+        function formatLabel(name) {
+            return name.split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+        }
+        
+        // Load data when page loads
+        loadData();
+    </script>
+</body>
+</html>

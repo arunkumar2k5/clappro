@@ -48,13 +48,15 @@ def generate_excel_export(
     
     ws['A2'] = "Confidence"
     ws['A2'].font = bold_font
-    ws['B2'] = f"{confidence_scores.get('base', 0) * 100:.1f}%"
+    base_conf = confidence_scores.get('base', 0)
+    ws['B2'] = f"{base_conf:.1f}%" if base_conf > 1 else f"{base_conf * 100:.1f}%"
     ws['B2'].alignment = center_align
     
     col_idx = 3
     for comp in comparisons:
         cell = ws.cell(row=2, column=col_idx)
-        cell.value = f"{confidence_scores.get(comp.part_number, 0) * 100:.1f}%"
+        comp_conf = confidence_scores.get(comp.part_number, 0)
+        cell.value = f"{comp_conf:.1f}%" if comp_conf > 1 else f"{comp_conf * 100:.1f}%"
         cell.alignment = center_align
         col_idx += 1
     

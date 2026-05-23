@@ -1,0 +1,44 @@
+{
+  "parameters": [
+    {
+      "name": "supply_voltage",
+      "description": "Operating DC supply voltage range",
+      "symbols": ["VCC", "VDD", "VS", "VSUPPLY"],
+      "aliases": [
+        "supply voltage",
+        "operating voltage",
+        "power supply voltage"
+      ],
+      "unit": "V",
+      "value_type": "range",
+      "comparison_type": "range_must_cover",
+      "notes": "Additional notes about the parameter",
+      "confidence": 0
+    },
+    {
+      "name": "input_high_voltage",
+      "description": "Minimum voltage for logic HIGH",
+      "symbols": ["VIH", "VIN_H", "VINH"],
+      "aliases": [
+        "input high voltage",
+        "logic high input voltage",
+        "high level input voltage"
+      ],
+      "unit": "V",
+      "value_type": "min",
+      "confidence": 0
+    },
+    {
+      "name": "output_current",
+      "description": "Maximum output current capability",
+      "symbols": ["IO", "IOUT"],
+      "aliases": [
+        "output current",
+        "load current"
+      ],
+      "unit": "A",
+      "value_type": "max",
+      "confidence": 0
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, Download, FileText } from 'lucide-react';
+import { Check, X, Download, FileText, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 import { ExtractionResult, ComparisonResponse, Parameter } from '@/types';
 import { BlobLoader } from '@/components/BlobLoader';
@@ -9,17 +9,56 @@ interface Screen5ResultsProps {
   extractionResults: ExtractionResult[];
   parameters: Parameter[];
   onExtractionEdit: (results: ExtractionResult[]) => void;
+  onTimingAnalysis?: (baseResult: ExtractionResult, candidateResult: ExtractionResult, mode: 'normal' | 'condition' | 'ai') => void;
 }
 
 export const Screen5Results: React.FC<Screen5ResultsProps> = ({
   extractionResults,
   parameters,
   onExtractionEdit,
+  onTimingAnalysis,
 }) => {
   const [phase, setPhase] = useState<'review' | 'comparison'>('review');
   const [editableResults, setEditableResults] = useState(extractionResults);
   const [comparisonData, setComparisonData] = useState<ComparisonResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedForTiming, setSelectedForTiming] = useState<number[]>([]);
+  const [showTimingDropdown, setShowTimingDropdown] = useState(false);
+
+  // Utility function to check if parameter is AC characteristic (time-based)
+  const isACCharacteristic = (unit: string | undefined): boolean => {
+    if (!unit) return false;
+    const timeBased = ['s', 'ms', 'us', 'ns', 'ps', 'μs'];
+    return timeBased.some(timeUnit => unit.toLowerCase().includes(timeUnit));
+  };
+
+  // Utility function to get row background color based on parameter type
+  const getRowColor = (param: Parameter): string => {
+    const isAC = isACCharacteristic(param.unit);
+    return isAC ? 'bg-blue-100' : 'bg-white';
+  };
+
+  // Utility function to get cell background color based on confidence and parameter type
+  const getCellColor = (param: Parameter, confidence: number | undefined, isBaseColumn: boolean = false): string => {
+    const isAC = isACCharacteristic(param.unit);
+    
+    // Low confidence takes priority
+    if (confidence !== undefined && confidence < 80) {
+      return 'bg-red-100';
+    }
+    
+    // AC characteristics
+    if (isAC) {
+      return 'bg-blue-100';
+    }
+    
+    // Base column gets slight blue tint for DC parameters
+    if (isBaseColumn) {
+      return 'bg-blue-50';
+    }
+    
+    return 'bg-white';
+  };
 
   const handleCellEdit = (componentIndex: number, paramName: string, newValue: string) => {
     const updated = [...editableResults];
@@ -46,6 +85,43 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
     } else if (result.datasheetUrl) {
       // Open external URL
       window.open(result.datasheetUrl, '_blank');
+    }
+  };
+
+  const handleTimingCheckbox = (index: number) => {
+    setSelectedForTiming(prev => {
+      if (prev.includes(index)) {
+        return prev.filter(i => i !== index);
+      } else {
+        // Only allow 2 selections
+        if (prev.length >= 2) {
+          alert('You can only select 2 components for timing analysis');
+          return prev;
+        }
+        return [...prev, index];
+      }
+    });
+  };
+
+  const handleTimingAnalysis = (mode: 'normal' | 'condition' | 'ai') => {
+    if (selectedForTiming.length !== 2) {
+      alert('Please select exactly 2 components for timing analysis');
+      return;
+    }
+
+    if (mode === 'condition') {
+      alert('Condition mode is not yet implemented. Coming soon!');
+      return;
+    }
+
+    const [baseIdx, candidateIdx] = selectedForTiming.sort((a, b) => a - b);
+    const baseResult = editableResults[baseIdx];
+    const candidateResult = editableResults[candidateIdx];
+
+    setShowTimingDropdown(false);
+
+    if (onTimingAnalysis) {
+      onTimingAnalysis(baseResult, candidateResult, mode);
     }
   };
 
@@ -152,9 +228,19 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Parameter</th>
                 {editableResults.map((result, idx) => (
                   <th key={idx} className={`px-4 py-3 text-center text-sm font-semibold ${idx === 0 ? 'bg-blue-100 text-blue-900' : 'text-gray-700'}`}>
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedForTiming.includes(idx)}
+                        onChange={() => handleTimingCheckbox(idx)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        title="Select for timing analysis"
+                      />
+                      <span className="text-xs text-gray-600">Timing</span>
+                    </div>
                     <div>{result.partNumber}</div>
                     <div className="text-xs font-normal mt-1">
-                      Confidence: {(result.overallConfidence * 100).toFixed(1)}%
+                      Confidence: {result.overallConfidence > 1 ? result.overallConfidence.toFixed(1) : (result.overallConfidence * 100).toFixed(1)}%
                     </div>
                     {idx === 0 && (
                       <div className="text-xs font-normal text-blue-600 mt-1">BASE</div>
@@ -164,30 +250,36 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
               </tr>
             </thead>
             <tbody>
-              {parameters.map((param, paramIdx) => (
-                <tr key={param.name} className={paramIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-4 py-3 font-medium text-gray-900">
-                    {param.label}
-                    {param.unit && <span className="text-sm text-gray-500 ml-1">({param.unit})</span>}
-                  </td>
-                  {editableResults.map((result, compIdx) => {
-                    const currentValue = result.parameters[param.name]?.value || '';
-                    const displayValue = currentValue === 'N/A' || !currentValue ? '' : currentValue;
-                    
-                    return (
-                      <td key={compIdx} className={compIdx === 0 ? 'bg-blue-50' : ''}>
-                        <input
-                          type="text"
-                          value={displayValue}
-                          onChange={(e) => handleCellEdit(compIdx, param.name, e.target.value)}
-                          placeholder="N/A"
-                          className="w-full px-3 py-2 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
-                        />
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {parameters.map((param, paramIdx) => {
+                const rowColor = getRowColor(param);
+                
+                return (
+                  <tr key={param.name} className={rowColor}>
+                    <td className="px-4 py-3 font-medium text-gray-900">
+                      {param.label || param.name}
+                      {param.unit && <span className="text-sm text-gray-500 ml-1">({param.unit})</span>}
+                    </td>
+                    {editableResults.map((result, compIdx) => {
+                      const currentValue = result.parameters[param.name]?.value || '';
+                      const displayValue = currentValue === 'N/A' || !currentValue ? '' : currentValue;
+                      const confidence = result.parameters[param.name]?.confidence;
+                      const cellColor = getCellColor(param, confidence, compIdx === 0);
+                      
+                      return (
+                        <td key={compIdx} className={cellColor}>
+                          <input
+                            type="text"
+                            value={displayValue}
+                            onChange={(e) => handleCellEdit(compIdx, param.name, e.target.value)}
+                            placeholder="N/A"
+                            className="w-full px-3 py-2 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 bg-transparent"
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
               
               {/* Datasheet Row */}
               <tr className="bg-gradient-to-r from-green-50 to-emerald-50 border-t-2 border-green-200">
@@ -211,7 +303,61 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
           </table>
         </div>
 
-        <div className="flex justify-end">
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
+          <div className="flex gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-6 bg-white border border-gray-300 rounded"></div>
+              <span className="text-gray-700">DC Parameters</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-6 bg-blue-100 border border-gray-300 rounded"></div>
+              <span className="text-gray-700">AC Parameters (time-based)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-6 bg-red-100 border border-gray-300 rounded"></div>
+              <span className="text-gray-700">Low Confidence (&lt;80%)</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-4">
+          <div className="relative">
+            <button
+              onClick={() => setShowTimingDropdown(!showTimingDropdown)}
+              disabled={selectedForTiming.length !== 2}
+              className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
+              title={selectedForTiming.length !== 2 ? 'Select exactly 2 components' : 'Analyze timing compatibility'}
+            >
+              Timing Analysis
+              <ChevronDown size={18} />
+            </button>
+            {showTimingDropdown && selectedForTiming.length === 2 && (
+              <div className="absolute top-full mt-2 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px] z-10">
+                <button
+                  onClick={() => handleTimingAnalysis('normal')}
+                  className="w-full px-4 py-2 text-left hover:bg-purple-50 text-gray-700 hover:text-purple-700 transition-colors"
+                >
+                  <div className="font-semibold">Normal Mode</div>
+                  <div className="text-xs text-gray-500">Standard timing analysis</div>
+                </button>
+                <button
+                  onClick={() => handleTimingAnalysis('condition')}
+                  className="w-full px-4 py-2 text-left hover:bg-purple-50 text-gray-700 hover:text-purple-700 transition-colors"
+                >
+                  <div className="font-semibold">Condition Mode</div>
+                  <div className="text-xs text-gray-500">Upload custom conditions</div>
+                </button>
+                <button
+                  onClick={() => handleTimingAnalysis('ai')}
+                  className="w-full px-4 py-2 text-left hover:bg-purple-50 text-gray-700 hover:text-purple-700 transition-colors"
+                >
+                  <div className="font-semibold">AI Mode</div>
+                  <div className="text-xs text-gray-500">AI-powered analysis with chat</div>
+                </button>
+              </div>
+            )}
+          </div>
           <button
             onClick={handleCompare}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
@@ -280,42 +426,82 @@ export const Screen5Results: React.FC<Screen5ResultsProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {parameters.map((param, paramIdx) => (
-                  <tr key={param.name} className={paramIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {param.label}
-                      {param.unit && <span className="text-sm text-gray-500 ml-1">({param.unit})</span>}
-                    </td>
-                    <td className="px-4 py-3 text-center bg-blue-50 font-medium">
-                      {editableResults[0].parameters[param.name]?.value || 'N/A'}
-                    </td>
-                    {comparisonData.comparisons.map((comp, compIdx) => {
-                      const cell = comp.parameters[param.name];
-                      const isMatch = cell?.status === 'match';
-                      const isNoMatch = cell?.status === 'no_match';
-                      
-                      return (
-                        <td
-                          key={compIdx}
-                          className={`px-4 py-3 text-center ${
-                            isMatch ? 'bg-green-100' : isNoMatch ? 'bg-red-100' : ''
-                          }`}
-                        >
-                          <div className="flex items-center justify-center gap-2">
-                            {isMatch && <Check className="text-green-600" size={16} />}
-                            {isNoMatch && <X className="text-red-600" size={16} />}
-                            <span>{cell?.value || 'N/A'}</span>
-                          </div>
-                        </td>
-                      );
-                    })}
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {comparisonData.justifications[param.name]}
-                    </td>
-                  </tr>
-                ))}
+                {parameters.map((param, paramIdx) => {
+                  const rowColor = getRowColor(param);
+                  const baseConfidence = editableResults[0].parameters[param.name]?.confidence;
+                  
+                  return (
+                    <tr key={param.name} className={rowColor}>
+                      <td className="px-4 py-3 font-medium text-gray-900">
+                        {param.label || param.name}
+                        {param.unit && <span className="text-sm text-gray-500 ml-1">({param.unit})</span>}
+                      </td>
+                      <td className={`px-4 py-3 text-center font-medium ${
+                        getCellColor(param, baseConfidence, true)
+                      }`}>
+                        <div>{editableResults[0].parameters[param.name]?.value || 'N/A'}</div>
+                      </td>
+                      {comparisonData.comparisons.map((comp, compIdx) => {
+                        const cell = comp.parameters[param.name];
+                        const isMatch = cell?.status === 'match';
+                        const isNoMatch = cell?.status === 'no_match';
+                        const candidateResult = editableResults[compIdx + 1];
+                        const candidateConfidence = candidateResult?.parameters[param.name]?.confidence;
+                        
+                        let cellBgColor = '';
+                        if (candidateConfidence !== undefined && candidateConfidence < 80) {
+                          cellBgColor = 'bg-red-100';
+                        } else if (isMatch) {
+                          cellBgColor = 'bg-green-100';
+                        } else if (isNoMatch) {
+                          cellBgColor = 'bg-red-100';
+                        } else {
+                          cellBgColor = getCellColor(param, candidateConfidence, false);
+                        }
+                        
+                        return (
+                          <td
+                            key={compIdx}
+                            className={`px-4 py-3 text-center ${cellBgColor}`}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              {isMatch && <Check className="text-green-600" size={16} />}
+                              {isNoMatch && <X className="text-red-600" size={16} />}
+                              <span>{cell?.value || 'N/A'}</span>
+                            </div>
+                          </td>
+                        );
+                      })}
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {comparisonData.justifications[param.name]}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
+            <div className="flex gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-6 bg-white border border-gray-300 rounded"></div>
+                <span className="text-gray-700">DC Parameters</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-6 bg-blue-100 border border-gray-300 rounded"></div>
+                <span className="text-gray-700">AC Parameters (time-based)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-6 bg-red-100 border border-gray-300 rounded"></div>
+                <span className="text-gray-700">Low Confidence (&lt;80%)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-6 bg-green-100 border border-gray-300 rounded"></div>
+                <span className="text-gray-700">Match</span>
+              </div>
+            </div>
           </div>
 
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">

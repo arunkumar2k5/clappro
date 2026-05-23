@@ -11,7 +11,7 @@
     { "name": "footprint", "label": "Footprint", "unit": "" },
     { "name": "voltage", "label": "Supply Voltage", "unit": "V" },
     { "name": "access_time", "label": "Access Time", "unit": "ns" },
-    { "name": "Read_cycle_time", "label": "Read_cycle_time", "unit": "ns" },
+    { "name": "Read_cycle_time", "label": "Read Cycle Time", "unit": "ns" },
     { "name": "operating_temp_min", "label": "Operating Temperature (Min)", "unit": "°C" },
     { "name": "operating_temp_max", "label": "Operating Temperature (Max)", "unit": "°C" }
   ],

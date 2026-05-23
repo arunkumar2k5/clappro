@@ -2,112 +2,112 @@
   "parameters": [
     {
       "name": "Input Voltage",
-      "value": NaN,
+      "value": null,
       "unit": "V",
       "Symbol": "VI",
       "confidence": 0
     },
     {
       "name": "Feedback Voltage",
-      "value": NaN,
+      "value": null,
       "unit": "V",
       "Symbol": "V(BG)",
       "confidence": 0
     },
     {
       "name": "Quiescent Current",
-      "value": NaN,
+      "value": null,
       "unit": "A",
       "Symbol": "IQ",
       "confidence": 0
     },
     {
       "name": "Output Current",
-      "value": NaN,
+      "value": null,
       "unit": "A",
       "Symbol": "IO",
       "confidence": 0
     },
     {
       "name": "Short-circuit current limit",
-      "value": NaN,
+      "value": null,
       "unit": "A",
       "Symbol": "I(LIMx)",
       "confidence": 0
     },
     {
       "name": "Power-supply rejection ratio",
-      "value": NaN,
-      "unit": NaN,
+      "value": null,
+      "unit": null,
       "Symbol": "IO/ILIM",
       "confidence": 0
     },
     {
       "name": "Junction-to-ambient thermal resistance",
-      "value": NaN,
+      "value": null,
       "unit": "°C/W",
       "Symbol": "RθJA",
       "confidence": 0
     },
     {
       "name": "Logic input low level",
-      "value": NaN,
+      "value": null,
       "unit": "V",
       "Symbol": "VIL",
       "confidence": 0
     },
     {
       "name": "Logic input high level",
-      "value": NaN,
+      "value": null,
       "unit": "V",
       "Symbol": "VIH",
       "confidence": 0
     },
     {
       "name": "Dropout Voltage",
-      "value": NaN,
+      "value": null,
       "unit": "V",
       "Symbol": "VOL",
       "confidence": 0
     },
     {
       "name": "Regulated output",
-      "value": NaN,
+      "value": null,
       "unit": "V",
       "Symbol": "VO",
       "confidence": 0
     },
     {
       "name": "Line Regulation",
-      "value": NaN,
+      "value": null,
       "unit": "mV",
       "Symbol": "",
       "confidence": 0
     },
     {
       "name": "Load Regulation",
-      "value": NaN,
+      "value": null,
       "unit": "V/A",
       "Symbol": "",
       "confidence": 0
     },
     {
       "name": "Feedback pin current",
-      "value": NaN,
+      "value": null,
       "unit": "A",
       "Symbol": "",
       "confidence": 0
     },
     {
       "name": "Junction Temperature",
-      "value": NaN,
+      "value": null,
       "unit": "°C",
       "Symbol": "TJ",
       "confidence": 0
     },
     {
       "name": "Ambient Temperature",
-      "value": NaN,
+      "value": null,
       "unit": "°C",
       "Symbol": "TA",
       "confidence": 0
