@@ -244,7 +244,12 @@ This is a clappro a calp project for the active Electronics component
 ## command to run Backend and front end. 
 
 ## backend
+.\venv\Scripts\activate
 uvicorn main:app --reload --port 8001
+
 
 ## frontend
 npm run dev
+
+# XTRACT_AI Compatability . 
+The Timing analysis branch is compatible with XTRACT_AI version 1.036 
