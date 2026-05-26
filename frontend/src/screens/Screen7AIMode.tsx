@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, FileText, Camera, Send, Settings, Loader, Download } from 'lucide-react';
+import { ArrowLeft, FileText, Camera, Send, Settings, Loader, Download, MessageSquare } from 'lucide-react';
 import axios from 'axios';
-import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer } from 'docx';
+import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
+import { marked } from 'marked';
 import { ExtractionResult } from '@/types';
 import '../screens/SharedScreen.css';
+import './AISummary.css';
 
 interface Screen7AIModeProps {
   baseResult: ExtractionResult;
@@ -32,6 +34,10 @@ export const Screen7AIMode: React.FC<Screen7AIModeProps> = ({
   const [sendingMessage, setSendingMessage] = useState(false);
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [showSummary, setShowSummary] = useState(true);
+  const [selectedText, setSelectedText] = useState('');
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+  const [showSendButton, setShowSendButton] = useState(false);
+  const summaryRef = useRef<HTMLDivElement>(null);
   const [systemPrompt, setSystemPrompt] = useState(
     `You are an expert Electronics Digital Engineer specializing in ${componentType} memory components. 
 You have deep knowledge of timing parameters, AC/DC characteristics, and compatibility analysis for memory ICs.
@@ -63,7 +69,14 @@ Please analyze the READ and WRITE cycle timing parameters and provide:
 2. Detailed analysis of READ cycle parameters
 3. Detailed analysis of WRITE cycle parameters
 4. Any critical timing violations or concerns
-5. Recommendations for the replacement
+5. Give a Section called Final Summary in not more than 3 lines which summarizes the analysis
+
+IMPORTANT FORMATTING RULES:
+- Do NOT use emojis or icons in your response
+- Format all tables using markdown table syntax with clear headers
+- Use clear section headings with proper hierarchy
+- Keep formatting clean and professional
+
 
 Base Component Parameters:
 ${JSON.stringify(baseResult.parameters, null, 2)}
@@ -171,13 +184,60 @@ ${JSON.stringify(candidateResult.parameters, null, 2)}`;
     setShowPromptEditor(false);
   };
 
+  const handleMouseUp = () => {
+    setTimeout(() => {
+      const selection = window.getSelection();
+      const text = selection?.toString().trim();
+      
+      if (text && summaryRef.current && selection && summaryRef.current.contains(selection.anchorNode)) {
+        setSelectedText(text);
+        
+        // Get selection position
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        
+        // Position button near the end of selection
+        setButtonPosition({
+          x: rect.right + 10,
+          y: rect.top + window.scrollY - 5
+        });
+        
+        setShowSendButton(true);
+      } else {
+        setShowSendButton(false);
+      }
+    }, 10);
+  };
+
+  const handleSendToChat = () => {
+    setChatInput(selectedText);
+    setShowSendButton(false);
+    
+    // Clear selection
+    window.getSelection()?.removeAllRanges();
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (showSendButton && !(event.target as Element).closest('.send-to-chat-btn')) {
+      const selection = window.getSelection();
+      if (!selection?.toString().trim()) {
+        setShowSendButton(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSendButton]);
+
   const handleExportToWord = async () => {
     if (!aiAnalysisResult) return;
 
     try {
       // Parse the AI analysis result into structured sections
       const lines = aiAnalysisResult.split('\n');
-      const children = [];
+      const children: (Paragraph | Table)[] = [];
 
       // Title
       children.push(
@@ -210,21 +270,114 @@ ${JSON.stringify(candidateResult.parameters, null, 2)}`;
         })
       );
 
-      // Add analysis content
-      for (const line of lines) {
-        const trimmedLine = line.trim();
+      // Add analysis content - parse markdown tables
+      let i = 0;
+      while (i < lines.length) {
+        const trimmedLine = lines[i].trim();
+        
+        // Check if this is a table (markdown table starts with |)
+        if (trimmedLine.startsWith('|')) {
+          const tableLines = [];
+          let j = i;
+          
+          // Collect all table lines
+          while (j < lines.length && lines[j].trim().startsWith('|')) {
+            tableLines.push(lines[j].trim());
+            j++;
+          }
+          
+          // Parse table
+          if (tableLines.length >= 2) {
+            const tableRows: TableRow[] = [];
+            
+            // Process each table line
+            for (let rowIdx = 0; rowIdx < tableLines.length; rowIdx++) {
+              const line = tableLines[rowIdx];
+              
+              // Skip separator line (contains only |, -, and spaces)
+              if (/^\|[\s\-:|]+\|$/.test(line)) {
+                continue;
+              }
+              
+              // Split by | and clean up
+              const cells = line.split('|')
+                .map(cell => cell.trim())
+                .filter(cell => cell.length > 0);
+              
+              const isHeader = rowIdx === 0;
+              
+              const tableCells = cells.map(cellText => 
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: cellText.replace(/\*\*/g, ''),
+                          bold: isHeader,
+                          size: isHeader ? 22 : 20
+                        })
+                      ],
+                      alignment: AlignmentType.LEFT
+                    })
+                  ],
+                  shading: isHeader ? {
+                    fill: '4F46E5',
+                    color: 'FFFFFF'
+                  } : undefined,
+                  margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                  }
+                })
+              );
+              
+              tableRows.push(new TableRow({ children: tableCells }));
+            }
+            
+            // Create table
+            children.push(
+              new Table({
+                rows: tableRows,
+                width: {
+                  size: 100,
+                  type: WidthType.PERCENTAGE
+                },
+                borders: {
+                  top: { style: BorderStyle.SINGLE, size: 1, color: 'E5E7EB' },
+                  bottom: { style: BorderStyle.SINGLE, size: 1, color: 'E5E7EB' },
+                  left: { style: BorderStyle.SINGLE, size: 1, color: 'E5E7EB' },
+                  right: { style: BorderStyle.SINGLE, size: 1, color: 'E5E7EB' },
+                  insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: 'E5E7EB' },
+                  insideVertical: { style: BorderStyle.SINGLE, size: 1, color: 'E5E7EB' }
+                }
+              })
+            );
+            
+            // Add spacing after table
+            children.push(new Paragraph({ text: '', spacing: { after: 300 } }));
+          }
+          
+          i = j;
+          continue;
+        }
         
         if (!trimmedLine) {
           children.push(new Paragraph({ text: '', spacing: { after: 200 } }));
+          i++;
           continue;
         }
 
-        // Check if it's a heading (contains numbers like 1., 2., etc. or all caps)
-        if (/^\d+\./.test(trimmedLine) || trimmedLine === trimmedLine.toUpperCase() && trimmedLine.length < 50) {
+        // Check if it's a heading
+        if (trimmedLine.startsWith('#')) {
+          const headingLevel = trimmedLine.match(/^#+/)?.[0].length || 1;
+          const headingText = trimmedLine.replace(/^#+\s*/, '');
+          
           children.push(
             new Paragraph({
-              text: trimmedLine,
-              heading: HeadingLevel.HEADING_2,
+              text: headingText,
+              heading: headingLevel === 1 ? HeadingLevel.HEADING_1 : HeadingLevel.HEADING_2,
               spacing: { before: 300, after: 200 }
             })
           );
@@ -232,20 +385,35 @@ ${JSON.stringify(candidateResult.parameters, null, 2)}`;
           // Bullet point
           children.push(
             new Paragraph({
-              text: trimmedLine.replace(/^[-•]\s*/, ''),
+              text: trimmedLine.replace(/^[-•]\s*/, '').replace(/\*\*/g, ''),
               bullet: { level: 0 },
               spacing: { after: 100 }
             })
           );
-        } else {
+        } else if (trimmedLine.startsWith('>')) {
+          // Blockquote
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: trimmedLine.replace(/^>\s*/, ''),
+                  italics: true
+                })
+              ],
+              spacing: { after: 200, before: 200 }
+            })
+          );
+        } else if (trimmedLine !== '---') {
           // Regular paragraph
           children.push(
             new Paragraph({
-              text: trimmedLine,
+              text: trimmedLine.replace(/\*\*/g, ''),
               spacing: { after: 200 }
             })
           );
         }
+        
+        i++;
       }
 
       // Footer
@@ -342,12 +510,15 @@ ${JSON.stringify(candidateResult.parameters, null, 2)}`;
                   </button>
                 </div>
               </div>
-              <div className="p-6 max-h-96 overflow-y-auto">
-                <div className="prose max-w-none">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">
-                    {aiAnalysisResult}
-                  </pre>
-                </div>
+              <div 
+                ref={summaryRef}
+                className="p-8 max-h-96 overflow-y-auto"
+                onMouseUp={handleMouseUp}
+              >
+                <div 
+                  className="ai-summary-content"
+                  dangerouslySetInnerHTML={{ __html: marked.parse(aiAnalysisResult) }}
+                />
               </div>
             </div>
           )}
@@ -371,6 +542,21 @@ ${JSON.stringify(candidateResult.parameters, null, 2)}`;
                   <p className="text-gray-600">Analyzing timing compatibility...</p>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Send to Chat Button */}
+          {showSendButton && (
+            <div
+              className="send-to-chat-btn"
+              style={{
+                left: `${buttonPosition.x}px`,
+                top: `${buttonPosition.y}px`
+              }}
+              onClick={handleSendToChat}
+            >
+              <MessageSquare size={16} />
+              <span>Send to Chat</span>
             </div>
           )}
 

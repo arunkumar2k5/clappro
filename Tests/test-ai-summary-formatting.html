@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Summary Formatting & Text Selection</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/marked@9.1.0/marked.min.js"></script>
+    <style>
+        /* Custom CSS for AI Summary Formatting */
+        .ai-summary-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #1f2937;
+        }
+
+        .ai-summary-content h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: #111827;
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 0.5rem;
+        }
+
+        .ai-summary-content h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 0.4rem;
+        }
+
+        .ai-summary-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .ai-summary-content p {
+            margin-bottom: 1rem;
+        }
+
+        .ai-summary-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-summary-content thead {
+            background: linear-gradient(to right, #4f46e5, #6366f1);
+            color: white;
+        }
+
+        .ai-summary-content th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .ai-summary-content td {
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.95rem;
+        }
+
+        .ai-summary-content tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .ai-summary-content tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+
+        .ai-summary-content blockquote {
+            border-left: 4px solid #6366f1;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            color: #4b5563;
+            background-color: #f9fafb;
+            padding: 1rem;
+        }
+
+        .ai-summary-content hr {
+            border: none;
+            border-top: 2px solid #e5e7eb;
+            margin: 2rem 0;
+        }
+
+        .ai-summary-content ul, .ai-summary-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-summary-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-summary-content strong {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .ai-summary-content code {
+            background-color: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        /* Send to Chat Button */
+        .send-to-chat-btn {
+            position: fixed;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .send-to-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+        }
+
+        .send-to-chat-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Remove emoji/icons from content */
+        .ai-summary-content img[alt*="emoji"],
+        .ai-summary-content span[role="img"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        const dummyAIResponse = `# SRAM Timing Compatibility Analysis
+## Base Component: M48Z58 (ST Microelectronics) vs. Candidate: DS1225AD (Analog Devices/Dallas)
+
+---
+
+## 1. Overall Compatibility Verdict
+
+> NEEDS REVIEW
+
+While the majority of timing parameters are compatible, several parameter differences require careful system-level validation before substitution is approved.
+
+---
+
+## 2. READ Cycle Parameter Analysis
+
+| Parameter | M48Z58 (Base) | DS1225AD (Candidate) | Delta | Status |
+|---|---|---|---|---|
+| Read Cycle Time (tRC) | 70 ns | 70 ns | 0 ns | PASS |
+| Address Access Time (tAA) | 70 ns | 70 ns | 0 ns | PASS |
+| Chip Enable Access Time (tCE) | 70 ns | 70 ns | 0 ns | PASS |
+| Output Enable Access Time (tOE) | 35 ns | 35 ns | 0 ns | PASS |
+| CE to Output Low-Z (tLZCE) | 5 ns | 5 ns | 0 ns | PASS |
+| OE to Output Low-Z (tLZOE) | 5 ns | 5 ns | 0 ns | PASS |
+| Chip Disable to Output High-Z (tHZCE) | 25 ns | 25 ns | 0 ns | PASS |
+| Output Disable to High-Z (tHZOE) | 25 ns | 25 ns | 0 ns | PASS |
+| Output Hold After Address Change (tOH) | 10 ns | 5 ns | **-5 ns** | REVIEW |
+
+### READ Cycle Observations:
+- **Access timing is fully matched** — all primary read path parameters (tRC, tAA, tCE, tOE) are identical at 70/70/70/35 ns respectively, ensuring no read latency issues.
+- **Bus contention signals (tHZCE, tHZOE)** are identical at 25 ns, eliminating concerns about bus float timing.
+- **Output Hold After Address Change (tOH): CONCERN** — The DS1225AD specifies only **5 ns** versus the base component's **10 ns**. This means the candidate releases valid output data **5 ns sooner** after an address transition. In systems with tight bus timing margins or where the controller relies on the full 10 ns hold window for data capture, this reduced hold time could cause **data corruption or bus contention** if not accounted for in the board design.
+
+---
+
+## 3. WRITE Cycle Parameter Analysis
+
+| Parameter | M48Z58 (Base) | DS1225AD (Candidate) | Delta | Status |
+|---|---|---|---|---|
+| Write Cycle Time (tWC) | 70 ns | 70 ns | 0 ns | PASS |
+| Address Setup to WE (tAW) | 0 ns | 0 ns | 0 ns | PASS |
+| Address Setup to CE (tAS) | 0 ns | 0 ns | 0 ns | PASS |
+| WE Pulse Width (tWP) | 50 ns | 55 ns | **+5 ns** | REVIEW |
+| CE Write Pulse Width (tCW) | 55 ns | 55 ns | 0 ns | PASS |
+| Address Valid to WE (tAW end) | 60 ns | **0 ns** | **-60 ns** | CRITICAL |
+| Address Valid to CE (tACE end) | 60 ns | **0 ns** | **-60 ns** | CRITICAL |
+| WE to Address Hold (tHA) | 0 ns | **10 ns** | **+10 ns** | REVIEW |
+| CE to Address Hold | 0 ns | **10 ns** | **+10 ns** | REVIEW |
+| Data Setup to WE (tDW) | 30 ns | 30 ns | 0 ns | PASS |
+| Data Setup to CE (tDCE) | 30 ns | 30 ns | 0 ns | PASS |
+| Data Hold After WE (tDH) | 5 ns | **0 ns** | **-5 ns** | REVIEW |
+| Data Hold After CE (tDHCE) | 5 ns | **0 ns** | **-5 ns** | REVIEW |
+| WE to Output High-Z (tHZWE) | 25 ns | 25 ns | 0 ns | PASS |
+| WE to Output Active (tOW) | 5 ns | 5 ns | 0 ns | PASS |
+
+### WRITE Cycle Observations:
+- **Address Valid to WE / CE — CRITICAL VIOLATION:** The base M48Z58 requires the address to remain valid for **60 ns before the rising edge** of WE or CE (end-of-write). The DS1225AD specifies **0 ns** for this parameter. This is a fundamentally different timing definition and may reflect a different timing model (WE-controlled vs. address-controlled write cycle). **This requires careful datasheet cross-referencing** to confirm whether these parameters are measured differently or represent a genuine architectural difference.
+
+- **WE Pulse Width (tWP): MARGINAL CONCERN** — DS1225AD requires a **55 ns** minimum WE pulse versus the base's **50 ns**. The candidate is **stricter by 5 ns**. Any existing controller driving WE pulses at the minimum 50 ns boundary will violate the DS1225AD's requirement, potentially causing **failed or partial writes**.
+
+- **WE / CE to Address Hold (tHA): CONCERN** — DS1225AD requires a **10 ns address hold** after WE/CE deasserts, while the M48Z58 requires **0 ns**. Controllers designed for the M48Z58 may release the address bus immediately after WE/CE. This could violate the DS1225AD's 10 ns hold requirement, risking **write address latching errors**.
+
+---
+
+## 4. Critical Timing Violations & Concerns Summary
+
+| Severity | Parameter | Issue |
+|---|---|---|
+| CRITICAL | Address Valid to WE / CE (tAW) | 60 ns (Base) vs. 0 ns (Candidate) — 60 ns discrepancy; possible write data corruption risk |
+| REVIEW | WE Pulse Width (tWP) | Candidate requires 5 ns longer pulse (55 ns vs 50 ns); may violate controller minimum |
+| REVIEW | WE / CE to Address Hold (tHA) | Candidate requires 10 ns hold not required by base; controller may not comply |
+| REVIEW | Output Hold After Address Change (tOH) | Candidate provides 5 ns less hold; potential read bus timing margin reduction |
+| REVIEW | Data Hold After WE (tDH) | Candidate is more lenient (0 ns vs 5 ns); verify timing model consistency |
+| INFO | Supply Current (ICC) | Candidate draws more current (75–85 mA vs. 50 mA); verify power budget |
+| INFO | VIH Max | Base allows VCC+0.3V; Candidate caps at VCC — marginal overvoltage tolerance difference |
+
+---
+
+## 5. Final Summary
+
+The DS1225AD matches the M48Z58 on all primary read path timings (tRC, tAA, tCE, tOE), making read operations functionally compatible; however, the reduced output hold time (tOH: 5 ns vs. 10 ns) warrants system-level margin verification. The write cycle presents two critical concerns: a 60 ns discrepancy in address-valid-to-write-end timing (tAW) that may indicate incompatible write timing models, and a stricter WE pulse width requirement (55 ns vs. 50 ns) that could cause write failures if the controller operates at the base component's minimum boundary. **Substitution should not proceed without confirming the tAW timing model interpretation and validating controller compliance with the candidate's write timing constraints.**`;
+
+        const AISummaryTest = () => {
+            const [selectedText, setSelectedText] = useState('');
+            const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+            const [showButton, setShowButton] = useState(false);
+            const [chatInput, setChatInput] = useState('');
+            const summaryRef = useRef(null);
+            const chatInputRef = useRef(null);
+
+            // Convert markdown to HTML
+            const htmlContent = marked.parse(dummyAIResponse);
+
+            const handleMouseUp = (e) => {
+                setTimeout(() => {
+                    const selection = window.getSelection();
+                    const text = selection.toString().trim();
+                    
+                    if (text && summaryRef.current && summaryRef.current.contains(selection.anchorNode)) {
+                        setSelectedText(text);
+                        
+                        // Get selection position
+                        const range = selection.getRangeAt(0);
+                        const rect = range.getBoundingClientRect();
+                        
+                        // Position button near the end of selection
+                        setButtonPosition({
+                            x: rect.right + 10,
+                            y: rect.top + window.scrollY - 5
+                        });
+                        
+                        setShowButton(true);
+                    } else {
+                        setShowButton(false);
+                    }
+                }, 10);
+            };
+
+            const handleSendToChat = () => {
+                setChatInput(selectedText);
+                setShowButton(false);
+                
+                // Clear selection
+                window.getSelection().removeAllRanges();
+                
+                // Focus chat input
+                setTimeout(() => {
+                    chatInputRef.current?.focus();
+                }, 100);
+            };
+
+            const handleClickOutside = (e) => {
+                if (showButton && !e.target.closest('.send-to-chat-btn')) {
+                    const selection = window.getSelection();
+                    if (!selection.toString().trim()) {
+                        setShowButton(false);
+                    }
+                }
+            };
+
+            useEffect(() => {
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, [showButton]);
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-8">
+                    <div className="max-w-6xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8">
+                        <div className="space-y-6">
+                            {/* Header */}
+                            <div>
+                                <h1 className="text-3xl font-bold text-white mb-2">AI Summary Formatting Test</h1>
+                                <p className="text-gray-300">Test markdown rendering, table formatting, and text selection feature</p>
+                            </div>
+
+                            {/* AI Summary Section */}
+                            <div className="bg-white rounded-lg shadow overflow-hidden">
+                                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3">
+                                    <h3 className="text-lg font-bold text-white">AI Analysis Summary</h3>
+                                    <p className="text-sm text-gray-200 mt-1">Select any text to send to chat</p>
+                                </div>
+                                <div 
+                                    ref={summaryRef}
+                                    className="p-8 max-h-[600px] overflow-y-auto"
+                                    onMouseUp={handleMouseUp}
+                                >
+                                    <div 
+                                        className="ai-summary-content"
+                                        dangerouslySetInnerHTML={{ __html: htmlContent }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Send to Chat Button */}
+                            {showButton && (
+                                <div
+                                    className="send-to-chat-btn"
+                                    style={{
+                                        left: `${buttonPosition.x}px`,
+                                        top: `${buttonPosition.y}px`
+                                    }}
+                                    onClick={handleSendToChat}
+                                >
+                                    <span>💬</span>
+                                    <span>Send to Chat</span>
+                                </div>
+                            )}
+
+                            {/* Chat Input Section */}
+                            <div className="bg-white rounded-lg shadow overflow-hidden">
+                                <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-3">
+                                    <h3 className="text-lg font-bold text-white">Expert Chat Assistant</h3>
+                                </div>
+                                <div className="p-4">
+                                    <textarea
+                                        ref={chatInputRef}
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        placeholder="Selected text will appear here..."
+                                        className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                    <div className="mt-3 flex gap-2">
+                                        <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                                            Send Message
+                                        </button>
+                                        <button 
+                                            onClick={() => setChatInput('')}
+                                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Instructions */}
+                            <div className="bg-white/10 rounded-lg p-4">
+                                <h4 className="text-white font-semibold mb-2">Test Instructions:</h4>
+                                <ul className="text-gray-200 text-sm space-y-1">
+                                    <li>✅ Check table formatting (borders, headers, alternating rows)</li>
+                                    <li>✅ Check heading styles (size, bold, underlines)</li>
+                                    <li>✅ Check text readability (font size, spacing)</li>
+                                    <li>✅ Select any text in the summary</li>
+                                    <li>✅ Click "Send to Chat" button that appears</li>
+                                    <li>✅ Verify text populates in chat input below</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<AISummaryTest />, document.getElementById('root'));
+    </script>
+</body>
+</html>

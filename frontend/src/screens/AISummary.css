@@ -1,0 +1,145 @@
+/* Custom CSS for AI Summary Formatting */
+.ai-summary-content {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #1f2937;
+}
+
+.ai-summary-content h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    color: #111827;
+    border-bottom: 3px solid #4f46e5;
+    padding-bottom: 0.5rem;
+}
+
+.ai-summary-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    border-bottom: 2px solid #6366f1;
+    padding-bottom: 0.4rem;
+}
+
+.ai-summary-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.ai-summary-content p {
+    margin-bottom: 1rem;
+}
+
+.ai-summary-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.ai-summary-content thead {
+    background: linear-gradient(to right, #4f46e5, #6366f1);
+    color: white;
+}
+
+.ai-summary-content th {
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 1px solid #e5e7eb;
+}
+
+.ai-summary-content td {
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+}
+
+.ai-summary-content tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+.ai-summary-content tbody tr:hover {
+    background-color: #f3f4f6;
+}
+
+.ai-summary-content blockquote {
+    border-left: 4px solid #6366f1;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+    color: #4b5563;
+    background-color: #f9fafb;
+    padding: 1rem;
+}
+
+.ai-summary-content hr {
+    border: none;
+    border-top: 2px solid #e5e7eb;
+    margin: 2rem 0;
+}
+
+.ai-summary-content ul, .ai-summary-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.ai-summary-content li {
+    margin-bottom: 0.5rem;
+}
+
+.ai-summary-content strong {
+    font-weight: 600;
+    color: #111827;
+}
+
+.ai-summary-content code {
+    background-color: #f3f4f6;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+/* Send to Chat Button */
+.send-to-chat-btn {
+    position: fixed;
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.send-to-chat-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+}
+
+.send-to-chat-btn:active {
+    transform: translateY(0);
+}
+
+/* Remove emoji/icons from content */
+.ai-summary-content img[alt*="emoji"],
+.ai-summary-content span[role="img"] {
+    display: none;
+}
