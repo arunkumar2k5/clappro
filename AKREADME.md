@@ -252,4 +252,4 @@ uvicorn main:app --reload --port 8001
 npm run dev
 
 # XTRACT_AI Compatability . 
-The Timing analysis branch is compatible with XTRACT_AI version 1.036 
+The Timing analysis branch is compatible with XTRACT_AI version 1.035 
