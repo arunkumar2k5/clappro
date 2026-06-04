@@ -1,0 +1,537 @@
+{
+  "parameters": [
+    {
+      "name": "supply_voltage",
+      "description": "Operating DC supply voltage range within which all AC and DC parameters are guaranteed. The device must be powered within this range for reliable operation. Voltage grade is often encoded in the part number suffix (e.g. Microchip 24AA=1.7V, 24LC=2.5V, ST M24128-R=1.8V, M24128-W=2.5V).",
+      "symbols": ["VCC", "VDD", "VS", "VSUPPLY", "VCC(op)", "VDD(op)", "VCC(min)", "VCC(max)", "AVCC"],
+      "aliases": [
+        "supply voltage", "operating voltage", "power supply voltage",
+        "VCC operating range", "VDD operating range", "supply voltage range",
+        "operating supply voltage", "power supply range", "VCC range",
+        "power supply", "chip supply voltage", "device supply voltage"
+      ],
+      "unit": "V",
+      "value_type": "range",
+      "comparison_type": "range_must_cover",
+      "notes": "Candidate VCC range must fully contain base chip VCC range. Example: base 1.8-5.5V, candidate must support at minimum 1.8-5.5V.",
+      "confidence": 0
+    },
+    {
+      "name": "operating_temperature",
+      "description": "Ambient air temperature range over which all DC and AC specifications are guaranteed.",
+      "symbols": ["TA", "TAMB", "TOP", "Ta", "TOPER", "TAIR"],
+      "aliases": [
+        "ambient operating temperature", "operating temperature range",
+        "temperature range", "ambient temperature", "operating temperature",
+        "junction temperature range", "case temperature range",
+        "industrial temperature range", "commercial temperature range"
+      ],
+      "unit": "degC",
+      "value_type": "range",
+      "comparison_type": "range_must_cover",
+      "notes": "Candidate temperature range must be equal to or wider than base chip temperature range. A -40 to +125C part covers a -40 to +85C base.",
+      "confidence": 0
+    },
+    {
+      "name": "max_clock_frequency",
+      "description": "Maximum allowed SCL clock frequency at which all AC and DC parameters are guaranteed. Determines the highest I2C bus speed the device supports: Standard-mode 100 kHz, Fast-mode 400 kHz, Fast-mode Plus 1 MHz.",
+      "symbols": ["fC", "fSCL", "fCLK", "FCLK", "fMAX", "fI2C", "fCLOCK", "fOSC"],
+      "aliases": [
+        "clock frequency", "maximum clock frequency", "SCL clock frequency",
+        "operating clock frequency", "maximum SCL frequency", "bus clock frequency",
+        "I2C clock frequency", "serial clock frequency", "maximum operating frequency",
+        "SCL frequency maximum", "clock rate maximum",
+        "maximum bus frequency", "serial clock maximum"
+      ],
+      "unit": "kHz",
+      "value_type": "max",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "Candidate fC(max) must be >= base fC(max). System operates at the frequency the base chip supports; the replacement must handle at least that same speed. Higher max capability is a strict superset — always safe.",
+      "confidence": 0
+    },
+    {
+      "name": "input_high_voltage",
+      "description": "Minimum voltage that must be applied to an input pin (SCL, SDA, WC/WP, E0-E2) for the chip to recognise it as a logic HIGH level. Typically specified as a fraction of VCC.",
+      "symbols": ["VIH", "VIN_H", "VINH", "VIH(min)", "VH", "VIN(HIGH)"],
+      "aliases": [
+        "input high voltage", "input high level voltage", "logic high input voltage",
+        "high level input voltage", "input voltage high", "VIH minimum",
+        "high input threshold voltage", "input HIGH level", "minimum high input voltage",
+        "SCL SDA high threshold", "input logic high threshold",
+        "high-level input voltage", "logic 1 input threshold"
+      ],
+      "unit": "V",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate VIH(min) must be <= base VIH(min). A lower HIGH threshold means the chip is more tolerant of weaker drive signals. Practically: most vendors specify 0.7xVCC, so this rarely differentiates.",
+      "confidence": 0
+    },
+    {
+      "name": "input_low_voltage",
+      "description": "Maximum voltage at an input pin (SCL, SDA, WC/WP, E0-E2) that is still recognised as a logic LOW.",
+      "symbols": ["VIL", "VIN_L", "VINL", "VIL(max)", "VL", "VIN(LOW)"],
+      "aliases": [
+        "input low voltage", "input low level voltage", "logic low input voltage",
+        "low level input voltage", "input voltage low", "VIL maximum",
+        "low input threshold voltage", "input LOW level", "maximum low input voltage",
+        "SCL SDA low threshold", "input logic low threshold",
+        "low-level input voltage", "logic 0 input threshold"
+      ],
+      "unit": "V",
+      "value_type": "max",
+      "comparison_type": "chip_guarantee_max",
+      "notes": "Candidate VIL(max) must be >= base VIL(max). A higher VIL(max) means the chip accepts a higher voltage as LOW — more tolerant. Practically: most vendors specify 0.3xVCC, so this rarely differentiates.",
+      "confidence": 0
+    },
+    {
+      "name": "input_hysteresis_voltage",
+      "description": "Voltage hysteresis of the Schmitt trigger inputs on SCL and SDA. Provides noise immunity by requiring signals to move by this amount before a logic level transition is recognised. Not all vendors specify this explicitly.",
+      "symbols": ["VHYS", "VHYSTERESIS", "VHYST", "dVHYS", "VHyst"],
+      "aliases": [
+        "hysteresis voltage", "input hysteresis", "Schmitt trigger hysteresis",
+        "SCL SDA hysteresis", "input noise margin voltage",
+        "input voltage hysteresis", "threshold hysteresis",
+        "noise hysteresis", "input threshold hysteresis"
+      ],
+      "unit": "V",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "Candidate VHYS(min) must be >= base VHYS(min). Greater hysteresis provides more noise immunity. Microchip 24FC128 explicitly specifies 0.05xVCC; ST M24128 does not list a separate VHYS symbol.",
+      "confidence": 0
+    },
+    {
+      "name": "output_low_voltage",
+      "description": "Maximum SDA output pin voltage when the EEPROM is sinking the specified load current at logic LOW (open-drain output). Applies when the device drives ACK or read data.",
+      "symbols": ["VOL", "VOUT_L", "VOUTL", "VOL(max)", "VOL_SDA"],
+      "aliases": [
+        "output low voltage", "output low level voltage", "logic low output voltage",
+        "low level output voltage", "output voltage low", "VOL maximum",
+        "SDA output low voltage", "output LOW voltage", "output sink voltage",
+        "output low drive voltage", "SDA low output level"
+      ],
+      "unit": "V",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate VOL(max) must be <= base VOL(max). Candidate must pull SDA at least as low as the base chip under equivalent load current. Typical: 0.4V max at IOL = 3 mA across all vendors.",
+      "confidence": 0
+    },
+    {
+      "name": "supply_current_read",
+      "description": "Maximum current drawn from the VCC supply during active read operation with SCL clocking at the rated frequency. Atmel and Rohm use ICC1 for read current in a numbered ICC1/ICC2 convention.",
+      "symbols": ["ICC", "IDD", "ICCOP", "ICC(op)", "IDD(op)", "IREAD", "ICC_READ", "IDD_READ", "ICC1", "IDD1"],
+      "aliases": [
+        "supply current read", "operating supply current read", "active read current",
+        "ICC read maximum", "IDD read operating", "read current consumption",
+        "active current read", "operating current read", "VCC current read",
+        "current consumption read", "read operating current",
+        "read mode supply current", "operating current read", "ICC1 read"
+      ],
+      "unit": "mA",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate ICC read(max) must be <= base ICC read(max). Atmel AT24C128C and Rohm BR24G128 use ICC1 for read current (ICC2 for write) — important deviation from standard naming.",
+      "confidence": 0
+    },
+    {
+      "name": "supply_current_write",
+      "description": "Maximum current drawn from the VCC supply during the internal write cycle after the STOP condition. Atmel and Rohm use ICC2 for write current in a numbered ICC1/ICC2 convention.",
+      "symbols": ["ICC0", "IDD0", "ICCo", "ICC_WRITE", "IDD_WRITE", "IWRITE", "ICC(write)", "ICCw", "ICC2", "IDD2"],
+      "aliases": [
+        "supply current write", "write current", "programming current",
+        "ICC write maximum", "IDD write operating", "write current consumption",
+        "active current write", "operating current write", "VCC current write",
+        "current consumption write", "internal write current", "write cycle current",
+        "programming supply current", "operating current write", "ICC2 write"
+      ],
+      "unit": "mA",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate ICC write(max) must be <= base ICC write(max). Atmel AT24C128C and Rohm BR24G128 use ICC2 for write current — pair with ICC1 for read current.",
+      "confidence": 0
+    },
+    {
+      "name": "standby_current",
+      "description": "Quiescent current drawn from VCC when the device is in standby mode: not selected, no I2C activity, all inputs static. ST/ON Semi/Renesas use ICCS; Microchip/Atmel use ISB — two separate symbols for the same parameter.",
+      "symbols": ["ICC1", "ICCS", "ISB", "ISTBY", "ISB", "ISTANDBY", "IDD1", "IDDQ", "ICCQ", "IDDSTBY"],
+      "aliases": [
+        "standby current", "standby supply current", "quiescent current",
+        "power-down current", "idle current", "ICC standby", "IDD standby",
+        "standby mode current", "non-operating current", "CMOS standby current",
+        "sleep current", "static supply current", "leakage supply current",
+        "ISB standby", "ICCS standby"
+      ],
+      "unit": "uA",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate standby current(max) must be <= base standby current(max). CRITICAL SYMBOL NOTE: ST (ICCS) and Microchip/Atmel (ISB) use completely different symbols for this parameter. Both must be aliased.",
+      "confidence": 0
+    },
+    {
+      "name": "scl_clock_high_time",
+      "description": "Minimum time SCL must remain at logic HIGH within one clock cycle. Together with tLOW determines maximum clock frequency and duty cycle. The I2C bus master must sustain SCL HIGH for at least this duration. Rohm uses tSCLH instead of the standard tHIGH.",
+      "symbols": ["tCHCL", "tHIGH", "tH", "THIGH", "tSCLH", "t_HIGH", "tHI", "tHCLK"],
+      "aliases": [
+        "clock high time", "SCL high time", "clock pulse width high",
+        "SCL high period", "clock high pulse width", "tHIGH minimum",
+        "high period of SCL clock", "SCL HIGH duration", "clock mark time",
+        "SCL clock high width", "clock high level time",
+        "high time SCL", "clock high phase width"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tHIGH(min) must be <= base tHIGH(min). Bus master provides a fixed HIGH time designed for the base chip; the replacement must work with a shorter HIGH period. VENDOR NOTE: Rohm uses tSCLH (unique); ISSI uses tH as shorthand.",
+      "confidence": 0
+    },
+    {
+      "name": "scl_clock_low_time",
+      "description": "Minimum time SCL must remain at logic LOW within one clock cycle. The I2C bus master must hold SCL LOW for at least this duration to allow data setup and hold on SDA. Rohm uses tSCLL instead of the standard tLOW.",
+      "symbols": ["tCLCH", "tLOW", "tL", "TLOW", "tSCLL", "t_LOW", "tLO", "tLCLK"],
+      "aliases": [
+        "clock low time", "SCL low time", "clock pulse width low",
+        "SCL low period", "clock low pulse width", "tLOW minimum",
+        "low period of SCL clock", "SCL LOW duration", "clock space time",
+        "SCL clock low width", "clock low level time",
+        "low time SCL", "clock low phase width"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tLOW(min) must be <= base tLOW(min). VENDOR NOTE: Rohm uses tSCLL (unique); ISSI uses tL as shorthand.",
+      "confidence": 0
+    },
+    {
+      "name": "scl_sda_rise_time",
+      "description": "Maximum allowable rise time of SCL and SDA signals, measured from 0.3xVCC to 0.7xVCC. Determined by bus pull-up resistor and line capacitance. The device must tolerate signals rising up to this speed.",
+      "symbols": ["tR", "TR", "tXH1XH2", "tr", "tRISE", "tSCL_RISE", "tSDA_RISE", "tR_SCL"],
+      "aliases": [
+        "rise time", "signal rise time", "SDA SCL rise time", "bus rise time",
+        "input signal rise time", "SCL rise time", "SDA rise time",
+        "clock rise time", "I2C rise time", "data line rise time",
+        "SCL and SDA rise time", "tR maximum",
+        "input rise time maximum", "rising edge time",
+        "rise time of SDA and SCL signals", "rise time of both SDA and SCL"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_guarantee_max",
+      "notes": "Candidate tR(max) must be >= base tR(max). More tolerance for slow rising edges means safe in the existing bus RC environment. Symbol tR is the most consistent across all EEPROM vendors.",
+      "confidence": 0
+    },
+    {
+      "name": "scl_sda_fall_time",
+      "description": "Maximum allowable fall time of SCL and SDA INPUT signals, measured from 0.7xVCC to 0.3xVCC. The device must tolerate signals falling up to this speed. Note: some datasheets list a SEPARATE tOF for the SDA output driver — see sda_output_fall_time.",
+      "symbols": ["tF_IN", "TF", "tXL1XL2", "tf", "tFALL", "tSCL_FALL", "tSDA_FALL_IN", "tFI"],
+      "aliases": [
+        "fall time", "input signal fall time", "SDA SCL fall time", "bus fall time",
+        "SCL fall time", "SDA input fall time", "clock fall time",
+        "I2C input fall time", "input fall time", "SCL and SDA fall time",
+        "tF maximum input", "input falling edge time",
+        "falling edge time input", "fall time of SDA and SCL signals",
+        "fall time of both SDA and SCL"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_guarantee_max",
+      "notes": "Candidate input tF(max) must be >= base input tF(max). More tolerance for slow falling edges is safe. IMPORTANT: Microchip 24FC128 does NOT separate input tF from output tF — a single tF row covers both. ST M24128 lists them separately.",
+      "confidence": 0
+    },
+    {
+      "name": "sda_output_fall_time",
+      "description": "Maximum fall time of the SDA output signal when the EEPROM drives SDA LOW (open-drain output). Relevant during read data and ACK transmissions. Affects signal integrity at higher bus speeds. Microchip merges this with general tF; ST and newer Atmel list it separately as tOF.",
+      "symbols": ["tQL1QL2", "tOF", "tF_OUT", "TOF", "tF(out)", "tFALL_SDA_OUT", "tFO"],
+      "aliases": [
+        "SDA output fall time", "output fall time", "SDA fall time from VIH to VIL",
+        "SDA out fall time", "output signal fall time", "SDA falling edge time",
+        "data output fall time", "output transition fall time",
+        "SDA output low transition time", "tOF maximum",
+        "output fall time maximum", "SDA driven fall time",
+        "fall time of output", "output fall time from VIH(min) to VIL(max)"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate SDA output tF(max) must be <= base tF(max). A slower output fall (higher value) risks signal integrity issues at high frequencies. When only a single tF row appears in the datasheet (Microchip pattern), it covers both input and output.",
+      "confidence": 0
+    },
+    {
+      "name": "data_setup_time",
+      "description": "Minimum time SDA data must be stable and valid before the rising edge of SCL during data transfer. The I2C bus master ensures this setup time when writing data or address bytes. ON Semiconductor uses tDS instead of tSU:DAT.",
+      "symbols": ["tDXCH", "tSU:DAT", "TSU:DAT", "tSU.DAT", "tSU;DAT", "tSU_DAT", "tDS", "tDSU", "tD_SETUP"],
+      "aliases": [
+        "data setup time", "data input setup time", "SDA setup time",
+        "data valid before SCL rising edge", "data in setup time",
+        "tSU:DAT minimum", "setup time for data input",
+        "SDA setup before SCL high", "write data setup time",
+        "data bit setup time", "input data setup",
+        "data valid to rising clock", "SDA valid before SCL high"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tSU:DAT(min) must be <= base tSU:DAT(min). SEPARATOR NOTE: ON Semi uses tSU.DAT (period); NXP UM10204 spec uses tSU;DAT (semicolon). All are the same parameter. SYMBOL NOTE: ON Semi and ISSI use tDS as a short form.",
+      "confidence": 0
+    },
+    {
+      "name": "data_hold_time",
+      "description": "Minimum time SDA data must remain stable after the falling edge of SCL to avoid generating a spurious START or STOP condition. The I2C bus master maintains this hold time. ON Semiconductor and ISSI use tDH instead of tHD:DAT.",
+      "symbols": ["tCLDX", "tHD:DAT", "THD:DAT", "tHD.DAT", "tHD;DAT", "tHD_DAT", "tDH", "tDH_IN", "tDHD"],
+      "aliases": [
+        "data hold time", "data input hold time", "SDA hold time",
+        "data valid after SCL falling edge", "data in hold time",
+        "tHD:DAT minimum", "hold time for data input",
+        "SDA hold after SCL low", "write data hold time",
+        "data bit hold time", "input data hold",
+        "SDA stable after SCL fall", "data hold minimum"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tHD:DAT(min) must be <= base tHD:DAT(min). SEPARATOR NOTE: ON Semi uses tHD.DAT (period); NXP UM10204 uses tHD;DAT. SYMBOL NOTE: ON Semi and ISSI use tDH as a short form. Many datasheets specify 0 ns minimum for this parameter.",
+      "confidence": 0
+    },
+    {
+      "name": "data_out_hold_time",
+      "description": "Minimum time the EEPROM holds valid output data on SDA stable after the falling edge of SCL during read operations. This is a chip guarantee to the bus master — the system relies on SDA remaining valid for at least this duration.",
+      "symbols": ["tCLQX", "tDH", "tDO_HOLD", "tQX", "tOH_OUT", "tDOH", "tHD_OUT"],
+      "aliases": [
+        "data output hold time", "SDA output hold time", "data out hold",
+        "output data hold after SCL low", "SDA hold time output",
+        "read data hold time", "tDH minimum", "output hold time",
+        "data valid hold from SCL fall", "clock low to output invalid",
+        "SDA valid hold after SCL fall", "output data valid hold time"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "Candidate tDH(min) must be >= base tDH(min). The system relies on the EEPROM holding data valid for at least this time after SCL falls. ST uses tDH symbol for this; note symbol overlap with ON Semi's tDH meaning input data hold — distinguish by context (transmitter vs. receiver role).",
+      "confidence": 0
+    },
+    {
+      "name": "output_valid_from_clock",
+      "description": "Maximum time from the falling edge of SCL to when valid data is guaranteed on SDA for read operations. This is the I2C EEPROM equivalent of access time. Also known as tVD;DAT in the NXP UM10204 I2C specification.",
+      "symbols": ["tCLQV", "tAA", "TAA", "tDV", "tVD:DAT", "tVD;DAT", "tVD.DAT", "tACCESS", "tPD", "tCLQ", "tACK"],
+      "aliases": [
+        "output valid from clock", "clock low to data valid", "SCL fall to SDA data valid",
+        "data access time", "read access time", "tAA maximum",
+        "clock to output valid", "SCL to data valid delay",
+        "output data valid time", "clock low to valid data",
+        "data output delay from SCL", "read data valid time",
+        "access time from SCL", "clock falling to data valid",
+        "acknowledge valid time"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate tAA(max) must be <= base tAA(max). Replacement must deliver data at least as fast within the SCL clock period. tAA is the most consistent symbol across all EEPROM vendors. NXP UM10204 I2C spec uses tVD;DAT for this same measurement.",
+      "confidence": 0
+    },
+    {
+      "name": "start_condition_setup_time",
+      "description": "Minimum time from a rising edge of SCL to the falling edge of SDA that generates a (repeated) START condition. Rohm uses tSSU instead of the standard tSU:STA.",
+      "symbols": ["tCHDL", "tSU:STA", "TSU:STA", "tSU.STA", "tSU;STA", "tSU_STA", "tSSU", "tRS_SU", "tSTASU"],
+      "aliases": [
+        "start condition setup time", "repeated start setup time",
+        "START setup time", "Re-START setup time",
+        "SCL high to SDA low START", "tSU:STA minimum",
+        "setup time for start condition", "start bit setup",
+        "repeated start condition setup", "Sr setup time",
+        "start setup minimum", "setup time for repeated START condition",
+        "set-up time for a repeated START condition"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tSU:STA(min) must be <= base tSU:STA(min). SEPARATOR NOTE: ON Semi uses tSU.STA (period); NXP UM10204 uses tSU;STA. SYMBOL NOTE: Rohm uses tSSU (completely different symbol — high matching risk).",
+      "confidence": 0
+    },
+    {
+      "name": "start_condition_hold_time",
+      "description": "Minimum time after the SDA falling edge of a START condition before SCL can go LOW for the first clock pulse. Ensures reliable START detection by all devices. Rohm uses tSHD instead of the standard tHD:STA.",
+      "symbols": ["tDLCL", "tHD:STA", "THD:STA", "tHD.STA", "tHD;STA", "tHD_STA", "tSHD", "tSTARTH", "tSTAHD"],
+      "aliases": [
+        "start condition hold time", "START hold time",
+        "SDA falling to SCL falling START", "tHD:STA minimum",
+        "hold time for start condition", "start bit hold",
+        "SCL hold after START", "start condition hold",
+        "START hold after falling SDA", "hold time after start",
+        "start hold minimum", "hold time after (repeated) START condition",
+        "hold time (repeated) START condition"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tHD:STA(min) must be <= base tHD:STA(min). SEPARATOR NOTE: ON Semi uses tHD.STA (period); NXP UM10204 uses tHD;STA. SYMBOL NOTE: Rohm uses tSHD (completely different symbol — highest matching risk in this parameter group).",
+      "confidence": 0
+    },
+    {
+      "name": "stop_condition_setup_time",
+      "description": "Minimum time SCL must remain HIGH before the rising edge of SDA that generates the STOP condition. Rohm uses tSSTO; ON Semi uses tSTO (drops SU: prefix); legacy Catalyst used tPSU.",
+      "symbols": ["tCHDH", "tSU:STO", "TSU:STO", "tSU.STO", "tSU;STO", "tSU_STO", "tSTO", "tSSTO", "tPSU"],
+      "aliases": [
+        "stop condition setup time", "STOP setup time",
+        "SCL high before SDA rising STOP", "tSU:STO minimum",
+        "setup time for stop condition", "stop bit setup",
+        "SCL to SDA high STOP", "STOP condition setup",
+        "stop condition setup minimum", "stop setup time",
+        "setup time for STOP condition", "set-up time for STOP condition"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tSU:STO(min) must be <= base tSU:STO(min). SYMBOL NOTES: ON Semi uses tSTO (no SU prefix — significant divergence); Rohm uses tSSTO; legacy Catalyst Semiconductor used tPSU.",
+      "confidence": 0
+    },
+    {
+      "name": "bus_free_time",
+      "description": "Minimum time the I2C bus must remain free (SDA and SCL both HIGH) between a STOP condition and a new START condition. Ensures all bus devices have released the bus before a new transaction begins.",
+      "symbols": ["tDHDL", "tBUF", "TBUF", "tFREE", "tIDLE", "tBUS_FREE", "tBF", "tBUS"],
+      "aliases": [
+        "bus free time", "bus idle time", "time between stop and start",
+        "STOP to START time", "inter-transaction delay",
+        "tBUF minimum", "minimum bus free time",
+        "time bus must be free", "idle time between transmissions",
+        "STOP condition to START condition time", "bus turnaround time",
+        "idle bus time", "bus recovery time",
+        "bus free time between a STOP and START condition"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tBUF(min) must be <= base tBUF(min). tBUF is the most consistent symbol across all I2C EEPROM vendors — very low matching ambiguity.",
+      "confidence": 0
+    },
+    {
+      "name": "input_spike_suppression",
+      "description": "Maximum width of a noise spike on SCL or SDA that is filtered and suppressed by the device's built-in input filter. Pulses shorter than this value are ignored. Rohm uses tNF; old Atmel used tNS (easily confused with the unit nanoseconds).",
+      "symbols": ["tNS", "tSP", "TSP", "tNF", "tFILT", "tGLITCH", "tSPIKE", "tFW", "tSF"],
+      "aliases": [
+        "spike suppression", "noise spike suppression", "input filter time",
+        "pulse width ignored", "glitch filter time", "noise filter",
+        "SCL SDA spike filter", "tNS maximum", "tSP maximum",
+        "input spike filter", "noise rejection pulse width",
+        "maximum suppressed pulse width", "input glitch filter",
+        "pulse width ignored on SCL SDA", "input filter spike suppression",
+        "input spike suppression SDA SCL", "noise filter time"
+      ],
+      "unit": "ns",
+      "value_type": "max",
+      "comparison_type": "chip_guarantee_max",
+      "notes": "Candidate tSP(max) must be >= base tSP(max). More aggressive filtering provides at least the same noise immunity. CRITICAL SYMBOL WARNINGS: (1) Old Atmel used tNS for this parameter — do NOT confuse with the unit 'ns'; if 'tNS' appears as a row header in a timing table, it is this parameter. (2) Rohm uses tNF (noise filter time). Both must be aliased.",
+      "confidence": 0
+    },
+    {
+      "name": "wp_setup_time",
+      "description": "Minimum time the Write Protect (WP / WC) pin must be at the required stable level before the Start condition of a write instruction. Many vendors do not list a formal timing symbol — check both the AC table and the operational description.",
+      "symbols": ["tWLDL", "tSU:WC", "TSU:WP", "tSU.WP", "tWPS", "tSU_WP", "tWP_SU"],
+      "aliases": [
+        "WP setup time", "write protect setup time", "WC setup time",
+        "write control setup time", "WP pin setup time",
+        "tSU:WC minimum", "tSU:WP minimum",
+        "write protect setup before start", "WP valid before start condition",
+        "write control setup", "hardware write protect setup time",
+        "WP to SCL setup time", "write protect stable before start"
+      ],
+      "unit": "ns",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tSU:WP(min) must be <= base tSU:WP(min). IMPORTANT DIFFERENCE: ST M24128 specifies 0 ns (no setup required); Microchip 24FC128 specifies 600 ns — this will correctly flag NOT OK if comparing them. Many vendors do not list WP timing at all; treat absent spec as 'no constraint'.",
+      "confidence": 0
+    },
+    {
+      "name": "wp_hold_time",
+      "description": "Minimum time the Write Protect (WP / WC) pin must remain at the required stable level after the Stop condition of a write instruction. Many vendors do not list this parameter formally.",
+      "symbols": ["tDHWH", "tHD:WC", "THD:WP", "tHD.WP", "tWPH", "tHD_WP", "tWP_HD"],
+      "aliases": [
+        "WP hold time", "write protect hold time", "WC hold time",
+        "write control hold time", "WP pin hold time",
+        "tHD:WC minimum", "tHD:WP minimum",
+        "write protect hold after stop", "WP valid after stop condition",
+        "write control hold", "hardware write protect hold time",
+        "WP hold after stop", "write protect stable after stop"
+      ],
+      "unit": "us",
+      "value_type": "min",
+      "comparison_type": "system_requirement_min",
+      "notes": "Candidate tHD:WP(min) must be <= base tHD:WP(min). ST M24128 specifies 1 us; Microchip 24FC128 specifies 1.3 us — candidate requires MORE hold time than the system was designed for, correctly flagging NOT OK.",
+      "confidence": 0
+    },
+    {
+      "name": "write_cycle_time",
+      "description": "Maximum time required for the device to complete one internal EEPROM programming cycle after the STOP condition. Device is busy (NACK) during this period. ST uses tW; Microchip uses tWC; Atmel/Rohm use tWR — three different symbols for the same parameter across the major vendors.",
+      "symbols": ["tW", "tWR", "TWC", "tWC", "tPROG", "tWRITE", "tCYCLE", "tINT", "tBP"],
+      "aliases": [
+        "write cycle time", "internal write cycle time", "programming time",
+        "write time", "byte write time", "page write time",
+        "tW maximum", "tWR maximum", "TWC maximum",
+        "internal EEPROM write time", "write cycle duration",
+        "write completion time", "NVM write time",
+        "EEPROM programming cycle time", "self-timed write cycle",
+        "internal write cycle duration", "write cycle time maximum"
+      ],
+      "unit": "ms",
+      "value_type": "max",
+      "comparison_type": "chip_performance_max",
+      "notes": "Candidate tW(max) must be <= base tW(max). Firmware waits up to tW(base) before ACK polling or next command; a slower candidate will be accessed prematurely. CRITICAL SYMBOL NOTE: ST uses 'tW' (all M24 family); Microchip uses 'tWC'; Atmel/Rohm use 'tWR'. This ST vs. industry difference is the single highest-risk symbol collision in EEPROM write parameters.",
+      "confidence": 0
+    },
+    {
+      "name": "write_endurance",
+      "description": "Minimum guaranteed number of erase/write cycles per memory cell over the operating temperature range. Typically in a separate Reliability or Memory Characteristics table, NOT in the AC timing table. Most vendors do not use a short symbol for this — it appears as prose or a table row header.",
+      "symbols": ["Ncycle", "NWR", "NE_W", "NWRITE", "NENDURE", "NCYCLES", "NE/W", "WE"],
+      "aliases": [
+        "write endurance", "write cycle endurance", "erase write cycles",
+        "write cycles guaranteed", "endurance cycles",
+        "maximum write cycles", "write erase endurance",
+        "memory cell endurance", "programming endurance",
+        "write cycle count", "number of write cycles",
+        "EEPROM endurance", "cycling performance",
+        "endurance write cycles", "write erase cycle endurance",
+        "write erase cycles", "erase/write cycles"
+      ],
+      "unit": "cycles",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "Candidate write endurance must be >= base. Typical values: 1,000,000 cycles (Microchip, Atmel, ON Semi, ISSI, Rohm); 4,000,000 cycles (ST M24128 at TA=25C). LOCATION NOTE: This parameter is almost always in a reliability/endurance table, never the AC timing table.",
+      "confidence": 0
+    },
+    {
+      "name": "data_retention",
+      "description": "Minimum guaranteed time that data stored in the EEPROM is retained without power after the last write cycle. Always in the Reliability or Memory Characteristics section, not the AC timing table. Typical values range from 10 years (legacy NXP) to 200 years (ST, Microchip).",
+      "symbols": ["tRET", "TRET", "DRET", "tDR", "tDATA_RET"],
+      "aliases": [
+        "data retention", "data retention time", "memory retention",
+        "non-volatile retention", "data storage lifetime",
+        "retention period", "unpowered retention",
+        "EEPROM data retention", "NVM data retention",
+        "data retention years", "retention time",
+        "data stored retention", "non-volatile storage retention",
+        "retention guarantee"
+      ],
+      "unit": "year",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "Candidate data retention must be >= base. ST M24128 and Microchip 24LC128 both specify 200 years. NOTE: NXP PCF8582 (legacy) specifies only 10 years — dramatically different; would correctly flag NOT OK vs. a 200-year base device.",
+      "confidence": 0
+    },
+    {
+      "name": "page_size",
+      "description": "Size of the internal write page buffer in bytes. A page write can transfer up to this many bytes in a single cycle. If more bytes are sent, the address counter wraps within the page boundary causing data corruption. This parameter is almost always in prose (Device Operation section), NOT in a formal parameter table.",
+      "symbols": ["NPAGE", "PAGE_SIZE", "PAGE_BYTES", "NPAGE_WRITE"],
+      "aliases": [
+        "page size", "write page size", "page buffer size",
+        "page write size", "write page bytes",
+        "page write buffer", "memory page size",
+        "byte page size", "page length",
+        "write buffer size", "page write capability",
+        "page write buffer size", "bytes per page",
+        "64-byte page", "number of bytes per page"
+      ],
+      "unit": "bytes",
+      "value_type": "min",
+      "comparison_type": "chip_guarantee_min",
+      "notes": "Candidate page size must be >= base page size. Firmware written for the base chip sends up to page_size bytes per write; a smaller candidate buffer causes data rollover and corruption without any error. Standard for 128-Kbit family: 64 bytes (ST, Microchip, Atmel, ON Semi, ISSI, Rohm, Renesas). EXCEPTION: NXP PCF8582 uses 16 bytes — critical incompatibility. LOCATION NOTE: Almost always in prose ('Device Operation', 'Memory Organization'), never in the AC timing table.",
+      "confidence": 0
+    }
+  ]
+}
